@@ -16,74 +16,39 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    let notifications = []
+    // Get user notifications
+    const notifications = await sql`
+      SELECT 
+        id,
+        type,
+        title,
+        message,
+        data,
+        read,
+        created_at
+      FROM notifications
+      WHERE user_id = ${currentUser.userId}
+      ORDER BY created_at DESC
+      LIMIT 20
+    `
 
-    if (currentUser.role === 'admin') {
-      // Admin notifications: pending transactions
-      const pendingTransactions = await sql`
-        SELECT 
-          t.id,
-          t.created_at,
-          u.name as user_name,
-          p.name as product_name,
-          t.amount
-        FROM transactions t
-        JOIN users u ON t.user_id = u.id
-        JOIN products p ON t.product_id = p.id
-        WHERE t.status = 'pending'
-        ORDER BY t.created_at DESC
-        LIMIT 10
-      `
+    // Format notifications
+    const formattedNotifications = notifications.rows.map(notification => ({
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      data: notification.data,
+      read: notification.read,
+      created_at: notification.created_at,
+      action_url: getActionUrl(notification.type, notification.data)
+    }))
 
-      notifications = pendingTransactions.rows.map(tx => ({
-        id: `transaction-${tx.id}`,
-        type: 'pending_transaction',
-        title: 'Pesanan Baru Menunggu Persetujuan',
-        message: `${tx.user_name} memesan ${tx.product_name}`,
-        amount: tx.amount,
-        created_at: tx.created_at,
-        action_url: '/admin?tab=transactions',
-        read: false
-      }))
-
-    } else {
-      // Member notifications: approved/rejected transactions
-      const userTransactions = await sql`
-        SELECT 
-          t.id,
-          t.status,
-          t.updated_at,
-          t.created_at,
-          p.name as product_name,
-          t.amount,
-          t.download_link
-        FROM transactions t
-        JOIN products p ON t.product_id = p.id
-        WHERE t.user_id = ${currentUser.userId}
-          AND t.status IN ('approved', 'rejected')
-          AND t.updated_at > t.created_at
-        ORDER BY t.updated_at DESC
-        LIMIT 10
-      `
-
-      notifications = userTransactions.rows.map(tx => ({
-        id: `transaction-${tx.id}`,
-        type: tx.status === 'approved' ? 'transaction_approved' : 'transaction_rejected',
-        title: tx.status === 'approved' ? 'Pesanan Disetujui!' : 'Pesanan Ditolak',
-        message: tx.status === 'approved' 
-          ? `Pesanan ${tx.product_name} telah disetujui. Silakan download file Anda.`
-          : `Pesanan ${tx.product_name} ditolak. Silakan hubungi admin untuk informasi lebih lanjut.`,
-        amount: tx.amount,
-        created_at: tx.updated_at,
-        action_url: tx.status === 'approved' ? '/profile' : '/profile',
-        download_available: tx.status === 'approved' && tx.download_link,
-        read: false
-      }))
-    }
+    const unreadCount = notifications.rows.filter(n => !n.read).length
 
     return NextResponse.json({
-      notifications,
-      unread_count: notifications.length
+      notifications: formattedNotifications,
+      unread_count: unreadCount
     })
 
   } catch (error) {
@@ -92,5 +57,57 @@ export async function GET(request: NextRequest) {
       { error: 'Terjadi kesalahan server' },
       { status: 500 }
     )
+  }
+}
+
+// Mark notification as read
+export async function PATCH(request: NextRequest) {
+  try {
+    const currentUser = getCurrentUser(request)
+    
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    const { notificationId } = await request.json()
+
+    if (!notificationId) {
+      return NextResponse.json(
+        { error: 'Notification ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Update notification as read
+    await sql`
+      UPDATE notifications 
+      SET read = TRUE, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ${notificationId} AND user_id = ${currentUser.userId}
+    `
+
+    return NextResponse.json({ success: true })
+
+  } catch (error) {
+    console.error('Mark notification as read error:', error)
+    return NextResponse.json(
+      { error: 'Terjadi kesalahan server' },
+      { status: 500 }
+    )
+  }
+}
+
+// Helper function to determine action URL based on notification type
+function getActionUrl(type: string, data: any): string {
+  switch (type) {
+    case 'transaction_approved':
+    case 'transaction_rejected':
+      return '/profile'
+    case 'pending_transaction':
+      return '/admin?tab=transactions'
+    default:
+      return '/'
   }
 }

@@ -50,6 +50,22 @@ export async function initDatabase() {
     `
     console.log('Transactions table created successfully')
 
+    // Create notifications table
+    await sql`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        type VARCHAR(50) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        data JSONB,
+        read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `
+    console.log('Notifications table created successfully')
+
     console.log('Database tables created successfully')
     return { success: true, message: 'Database initialized successfully' }
   } catch (error) {

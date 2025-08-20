@@ -48,6 +48,52 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
     }
   }
 
+  const markAsRead = async (notificationId: string | number) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include',
+        body: JSON.stringify({ notificationId }),
+      })
+
+      if (response.ok) {
+        // Update local state
+        setNotifications(prev => 
+          prev.map(notif => 
+            notif.id === notificationId 
+              ? { ...notif, read: true }
+              : notif
+          )
+        )
+        // Update unread count
+        setUnreadCount(prev => Math.max(0, prev - 1))
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter(n => !n.read)
+      
+      // Mark all unread notifications as read
+      for (const notification of unreadNotifications) {
+        await markAsRead(notification.id)
+      }
+      
+      setUnreadCount(0)
+      setIsOpen(false)
+    } catch (error) {
+      console.error('Error marking all as read:', error)
+    }
+  }
+
   useEffect(() => {
     fetchNotifications()
     
@@ -169,8 +215,15 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
                   <Link
                     key={notification.id}
                     href={notification.action_url}
-                    onClick={() => setIsOpen(false)}
-                    className={`block px-4 py-3 hover:bg-gray-50 transition-colors border-l-4 ${getNotificationColor(notification.type)}`}
+                    onClick={() => {
+                      if (!notification.read) {
+                        markAsRead(notification.id)
+                      }
+                      setIsOpen(false)
+                    }}
+                    className={`block px-4 py-3 hover:bg-gray-50 transition-colors border-l-4 ${getNotificationColor(notification.type)} ${
+                      !notification.read ? 'bg-blue-50/50' : ''
+                    }`}
                   >
                     <div className="flex items-start space-x-3">
                       <span className="text-lg flex-shrink-0 mt-0.5">
@@ -202,11 +255,7 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
             {notifications.length > 0 && (
               <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
                 <button
-                  onClick={() => {
-                    setNotifications([])
-                    setUnreadCount(0)
-                    setIsOpen(false)
-                  }}
+                  onClick={markAllAsRead}
                   className="text-xs text-blue-600 hover:text-blue-800 transition-colors"
                 >
                   Tandai semua sudah dibaca

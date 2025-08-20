@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@vercel/postgres'
 import { getCurrentUser, requireAuth, requireAdmin } from '@/lib/jwt'
+import { createPendingTransactionNotification } from '@/lib/notifications'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     // Verify product exists and get price
     const productResult = await sql`
-      SELECT id, price FROM products WHERE id = ${product_id}
+      SELECT id, name, price FROM products WHERE id = ${product_id}
     `
 
     if (productResult.rows.length === 0) {
@@ -147,6 +148,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get user info for notification
+    const userResult = await sql`
+      SELECT name FROM users WHERE id = ${actualUserId}
+    `
+    const user = userResult.rows[0]
+
     // Create transaction
     const result = await sql`
       INSERT INTO transactions (user_id, product_id, amount, payment_proof, status)
@@ -154,9 +161,28 @@ export async function POST(request: NextRequest) {
       RETURNING *
     `
 
+    const transaction = result.rows[0]
+
+    // Get admin user to send notification
+    const adminResult = await sql`
+      SELECT id FROM users WHERE role = 'admin' LIMIT 1
+    `
+    
+    if (adminResult.rows.length > 0) {
+      const adminId = adminResult.rows[0].id
+      await createPendingTransactionNotification(
+        adminId,
+        user.name,
+        product.name,
+        transaction.id,
+        amount
+      )
+      console.log(`New transaction ${transaction.id} created. Notification sent to admin ${adminId}`)
+    }
+
     return NextResponse.json({
       message: 'Transaksi berhasil dibuat',
-      transaction: result.rows[0]
+      transaction: transaction
     })
 
   } catch (error) {

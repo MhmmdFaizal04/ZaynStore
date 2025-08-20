@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@vercel/postgres'
 import { getCurrentUser, requireAdmin } from '@/lib/jwt'
+import { createTransactionApprovedNotification, createTransactionRejectedNotification } from '@/lib/notifications'
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
@@ -35,6 +36,7 @@ export async function PUT(
       SELECT 
         t.*,
         p.file_url as product_file_url,
+        p.name as product_name,
         u.email as user_email,
         u.name as user_name
       FROM transactions t
@@ -71,11 +73,22 @@ export async function PUT(
 
     const updatedTransaction = result.rows[0]
 
-    // If approved, you can add email sending logic here
+    // Create notification for user
     if (status === 'approved') {
-      // TODO: Send email with download link
-      console.log(`Transaction ${transactionId} approved. Should send email to ${transaction.user_email}`)
-      console.log(`Download link: ${downloadLink}`)
+      await createTransactionApprovedNotification(
+        transaction.user_id,
+        transaction.product_name,
+        transactionId,
+        downloadLink
+      )
+      console.log(`Transaction ${transactionId} approved. Notification sent to user ${transaction.user_id}`)
+    } else if (status === 'rejected') {
+      await createTransactionRejectedNotification(
+        transaction.user_id,
+        transaction.product_name,
+        transactionId
+      )
+      console.log(`Transaction ${transactionId} rejected. Notification sent to user ${transaction.user_id}`)
     }
 
     return NextResponse.json({
