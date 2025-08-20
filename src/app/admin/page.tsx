@@ -35,17 +35,29 @@ interface Transaction {
   created_at: string
 }
 
+interface Member {
+  id: number
+  name: string
+  email: string
+  role: 'admin' | 'customer'
+  created_at: string
+  total_transactions: number
+  total_spent: number
+}
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [products, setProducts] = useState<Product[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalTransactions: 0,
     pendingTransactions: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    totalMembers: 0
   })
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false)
   const [isEditProductModalOpen, setIsEditProductModalOpen] = useState(false)
@@ -124,6 +136,13 @@ export default function AdminDashboard() {
       })
       const transactionsData = await transactionsResponse.json()
       
+      // Fetch members
+      const membersResponse = await fetch('/api/members', {
+        headers,
+        credentials: 'include'
+      })
+      const membersData = await membersResponse.json()
+      
       if (productsResponse.ok) {
         setProducts(productsData.products || [])
       }
@@ -140,13 +159,19 @@ export default function AdminDashboard() {
         const totalRevenue = transactionsData.transactions?.filter(
           (t: Transaction) => t.status === 'approved'
         ).reduce((sum: number, t: Transaction) => sum + t.amount, 0) || 0
+        const totalMembers = membersData.members?.length || 0
         
         setStats({
           totalProducts,
           totalTransactions,
           pendingTransactions,
-          totalRevenue
+          totalRevenue,
+          totalMembers
         })
+      }
+      
+      if (membersResponse.ok) {
+        setMembers(membersData.members || [])
       }
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -393,6 +418,114 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleResetProductSequence = async () => {
+    const confirmReset = confirm(
+      'Apakah Anda yakin ingin mereset sequence ID produk?\n\n' +
+      'Ini akan membuat produk baru memiliki ID yang berurutan dari ID tertinggi yang ada + 1.\n\n' +
+      'Proses ini aman dan tidak akan mengubah data yang sudah ada.'
+    )
+    
+    if (!confirmReset) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/reset-sequence', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          table: 'products'
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert(`Sequence berhasil direset!\n\nProduk baru akan memiliki ID mulai dari: ${data.next_id}`)
+      } else {
+        console.error('Reset sequence error:', data)
+        alert(data.error || 'Gagal mereset sequence')
+      }
+    } catch (error) {
+      console.error('Error resetting sequence:', error)
+      alert('Terjadi kesalahan saat mereset sequence')
+    }
+  }
+
+  const handleResetTransactionSequence = async () => {
+    const confirmReset = confirm(
+      'Apakah Anda yakin ingin mereset sequence ID transaksi?\n\n' +
+      'Ini akan membuat transaksi baru memiliki ID yang berurutan dari ID tertinggi yang ada + 1.\n\n' +
+      'Proses ini aman dan tidak akan mengubah data yang sudah ada.'
+    )
+    
+    if (!confirmReset) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/reset-sequence', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          table: 'transactions'
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert(`Sequence berhasil direset!\n\nTransaksi baru akan memiliki ID mulai dari: ${data.next_id}`)
+      } else {
+        console.error('Reset sequence error:', data)
+        alert(data.error || 'Gagal mereset sequence')
+      }
+    } catch (error) {
+      console.error('Error resetting sequence:', error)
+      alert('Terjadi kesalahan saat mereset sequence')
+    }
+  }
+
+  const handleDeleteMember = async (memberId: number, memberName: string) => {
+    const confirmDelete = confirm(
+      `Apakah Anda yakin ingin menghapus member "${memberName}"?\n\n` +
+      'Aksi ini tidak dapat dibatalkan!\n\n' +
+      'Catatan: Member yang memiliki transaksi tidak dapat dihapus.'
+    )
+    
+    if (!confirmDelete) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/members?id=${memberId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include'
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert(`Member "${memberName}" berhasil dihapus!`)
+        fetchData() // Refresh data
+      } else {
+        console.error('Delete member error:', data)
+        alert(data.error || 'Gagal menghapus member')
+      }
+    } catch (error) {
+      console.error('Error deleting member:', error)
+      alert('Terjadi kesalahan saat menghapus member')
+    }
+  }
+
   const handlePasswordFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordForm({
       ...passwordForm,
@@ -526,6 +659,7 @@ export default function AdminDashboard() {
               <option value="dashboard">📊 Dashboard</option>
               <option value="products">📦 Kelola Produk</option>
               <option value="transactions">💳 Transaksi</option>
+              <option value="members">👥 Kelola Member</option>
             </select>
           </div>
         </div>
@@ -579,6 +713,21 @@ export default function AdminDashboard() {
                   Transaksi
                 </button>
               </li>
+              <li>
+                <button
+                  onClick={() => setActiveTab('members')}
+                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors flex items-center gap-3 ${
+                    activeTab === 'members'
+                      ? 'bg-blue-50 text-blue-600 font-medium'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                  Members
+                </button>
+              </li>
             </ul>
           </nav>
         </div>
@@ -588,7 +737,7 @@ export default function AdminDashboard() {
           {activeTab === 'dashboard' && (
             <div>
               {/* Dashboard Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                   <div className="flex items-center">
                     <div className="p-2 bg-blue-100 rounded-lg">
@@ -627,6 +776,20 @@ export default function AdminDashboard() {
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Pending</p>
                       <p className="text-2xl font-bold text-gray-900">{stats.pendingTransactions}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Total Member</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats.totalMembers}</p>
                     </div>
                   </div>
                 </div>
@@ -705,12 +868,20 @@ export default function AdminDashboard() {
             <div>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Kelola Produk</h2>
-                <button
-                  onClick={() => setIsAddProductModalOpen(true)}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                >
-                  + Tambah Produk
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={handleResetProductSequence}
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    🔄 Reset ID Sequence
+                  </button>
+                  <button
+                    onClick={() => setIsAddProductModalOpen(true)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    + Tambah Produk
+                  </button>
+                </div>
               </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -796,12 +967,20 @@ export default function AdminDashboard() {
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Kelola Transaksi</h2>
-                <button
-                  onClick={handleFixDownloadLinks}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
-                >
-                  🔧 Perbaiki Download Links
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleResetTransactionSequence}
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    🔄 Reset ID Sequence
+                  </button>
+                  <button
+                    onClick={handleFixDownloadLinks}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                  >
+                    🔧 Perbaiki Download Links
+                  </button>
+                </div>
               </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -887,6 +1066,98 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'members' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Kelola Member</h2>
+                <div className="text-sm text-gray-600">
+                  Total: {members.length} member
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Member
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Role
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Transaksi
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Total Belanja
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Bergabung
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {members.map((member) => (
+                        <tr key={member.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{member.name}</div>
+                              <div className="text-sm text-gray-500">{member.email}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                              member.role === 'admin' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {member.role === 'admin' ? 'Admin' : 'Customer'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{member.total_transactions}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{formatPrice(member.total_spent)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{formatDate(member.created_at)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            {member.role === 'customer' && member.total_transactions === 0 && (
+                              <button
+                                onClick={() => handleDeleteMember(member.id, member.name)}
+                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                              >
+                                Hapus
+                              </button>
+                            )}
+                            {member.role === 'admin' && (
+                              <span className="text-gray-400 text-xs">Admin</span>
+                            )}
+                            {member.total_transactions > 0 && (
+                              <span className="text-gray-400 text-xs">Ada Transaksi</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {members.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Belum ada member yang terdaftar</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
