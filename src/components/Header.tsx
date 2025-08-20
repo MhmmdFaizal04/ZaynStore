@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import NotificationBell from './NotificationBell'
 
 interface User {
   id: number
@@ -107,6 +108,9 @@ export default function Header() {
                 )}
                 
                 <div className="flex items-center space-x-3 xl:space-x-4">
+                  {/* Notification Bell */}
+                  <NotificationBell userRole={user.role} />
+                  
                   <div className="text-gray-600 text-sm xl:text-base hidden xl:flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span>Halo, {user.name.length > 10 ? user.name.substring(0, 10) + '...' : user.name}</span>

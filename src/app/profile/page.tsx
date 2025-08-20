@@ -27,6 +27,8 @@ export default function ProfilePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('orders')
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -40,6 +42,11 @@ export default function ProfilePage() {
     const parsedUser = JSON.parse(userData)
     setUser(parsedUser)
     fetchUserTransactions(parsedUser.id)
+    fetchNotifications()
+
+    // Auto refresh notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
   }, [router])
 
   const fetchUserTransactions = async (userId: number) => {
@@ -51,6 +58,26 @@ export default function ProfilePage() {
       console.error('Error fetching transactions:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/notifications', {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setNotifications(data.notifications || [])
+        setUnreadCount(data.unread_count || 0)
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
     }
   }
 
@@ -165,6 +192,33 @@ export default function ProfilePage() {
         </div>
       </header>
 
+      {/* Notification Banner */}
+      {unreadCount > 0 && (
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 animate-slide-down">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-3.5-3.5a5.98 5.98 0 01-.5-2.5V9a6 6 0 10-12 0v2c0 .85-.18 1.66-.5 2.5L0 17h5m10 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span className="font-medium">
+                Anda memiliki {unreadCount} notifikasi baru tentang pesanan Anda
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setUnreadCount(0)
+                fetchNotifications()
+              }}
+              className="text-white/80 hover:text-white transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Mobile Navigation */}
         <div className="lg:hidden mb-6 animate-fade-in-up">
@@ -181,7 +235,7 @@ export default function ProfilePage() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setActiveTab('orders')}
                 className={`px-3 py-2 rounded-xl transition-all duration-300 text-sm transform hover:scale-105 ${
@@ -191,6 +245,21 @@ export default function ProfilePage() {
                 }`}
               >
                 📦 Pesanan
+              </button>
+              <button
+                onClick={() => setActiveTab('notifications')}
+                className={`px-3 py-2 rounded-xl transition-all duration-300 text-sm transform hover:scale-105 relative ${
+                  activeTab === 'notifications'
+                    ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 shadow-md border border-blue-200'
+                    : 'text-gray-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-blue-600'
+                }`}
+              >
+                🔔 Notifikasi
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab('profile')}
@@ -232,6 +301,21 @@ export default function ProfilePage() {
                   }`}
                 >
                   📦 Pesanan Saya
+                </button>
+                <button
+                  onClick={() => setActiveTab('notifications')}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 relative ${
+                    activeTab === 'notifications'
+                      ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 shadow-md border border-blue-200'
+                      : 'text-gray-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-blue-600'
+                  }`}
+                >
+                  🔔 Notifikasi
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('profile')}
@@ -323,6 +407,90 @@ export default function ProfilePage() {
                                   ❌ Pembayaran ditolak, silakan hubungi admin
                                 </div>
                               )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'notifications' && (
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 transform hover:shadow-xl transition-all duration-300">
+                <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Notifikasi</h2>
+                  <p className="text-sm text-gray-600">Update terbaru tentang pesanan Anda</p>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  {notifications.length === 0 ? (
+                    <div className="text-center py-8 sm:py-12">
+                      <div className="text-4xl sm:text-6xl mb-4">🔔</div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        Tidak Ada Notifikasi
+                      </h3>
+                      <p className="text-gray-600">
+                        Notifikasi tentang pesanan Anda akan muncul di sini
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {notifications.map((notification, index) => (
+                        <div
+                          key={notification.id}
+                          className={`p-4 rounded-xl border-l-4 transition-all duration-300 hover:shadow-md ${
+                            notification.type === 'transaction_approved'
+                              ? 'border-l-green-500 bg-green-50 hover:bg-green-100'
+                              : notification.type === 'transaction_rejected'
+                              ? 'border-l-red-500 bg-red-50 hover:bg-red-100'
+                              : 'border-l-blue-500 bg-blue-50 hover:bg-blue-100'
+                          }`}
+                          style={{ 
+                            animationDelay: `${index * 100}ms`,
+                            animation: 'fadeInUp 0.5s ease-out forwards'
+                          }}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 text-2xl">
+                              {notification.type === 'transaction_approved' ? '✅' : 
+                               notification.type === 'transaction_rejected' ? '❌' : '🔔'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                {notification.title}
+                              </h4>
+                              <p className="text-sm text-gray-700 mb-2">
+                                {notification.message}
+                              </p>
+                              {notification.amount && (
+                                <p className="text-sm font-medium text-gray-900 mb-2">
+                                  {new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR'
+                                  }).format(notification.amount)}
+                                </p>
+                              )}
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-gray-500">
+                                  {new Date(notification.created_at).toLocaleDateString('id-ID', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                                {notification.action_url && (
+                                  <Link
+                                    href={notification.action_url}
+                                    className="text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                                  >
+                                    Lihat Detail
+                                  </Link>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>

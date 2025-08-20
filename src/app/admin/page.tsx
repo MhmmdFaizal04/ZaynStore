@@ -49,6 +49,7 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [products, setProducts] = useState<Product[]>([])
+  const [pendingNotifications, setPendingNotifications] = useState(0)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
@@ -160,6 +161,9 @@ export default function AdminDashboard() {
           (t: Transaction) => t.status === 'approved'
         ).reduce((sum: number, t: Transaction) => sum + t.amount, 0) || 0
         const totalMembers = membersData.members?.length || 0
+        
+        // Update pending notifications count
+        setPendingNotifications(pendingTransactions)
         
         setStats({
           totalProducts,
@@ -710,7 +714,12 @@ export default function AdminDashboard() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  Transaksi
+                  <span className="flex-1">Transaksi</span>
+                  {pendingNotifications > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
+                      {pendingNotifications}
+                    </span>
+                  )}
                 </button>
               </li>
               <li>
