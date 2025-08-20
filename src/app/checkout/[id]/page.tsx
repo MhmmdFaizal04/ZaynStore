@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -27,20 +28,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
   const { user, isAuthenticated, loading: authLoading, token } = useAuth()
   const router = useRouter()
 
-  useEffect(() => {
-    // Check if user is authenticated
-    if (!authLoading && !isAuthenticated) {
-      router.push('/login')
-      return
-    }
-
-    if (isAuthenticated) {
-      // Fetch product details
-      fetchProduct()
-    }
-  }, [params.id, isAuthenticated, authLoading, router])
-
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       const response = await fetch(`/api/products/${params.id}`)
       const data = await response.json()
@@ -55,7 +43,20 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    // Check if user is authenticated
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login')
+      return
+    }
+
+    if (isAuthenticated) {
+      // Fetch product details
+      fetchProduct()
+    }
+  }, [params.id, isAuthenticated, authLoading, router, fetchProduct])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -229,11 +230,13 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
               {product && (
                 <div className="space-y-4">
                   <div className="flex space-x-4">
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                       {product.image_url ? (
-                        <img 
+                        <Image 
                           src={product.image_url} 
                           alt={product.name}
+                          width={80}
+                          height={80}
                           className="w-full h-full object-cover rounded-lg"
                         />
                       ) : (
@@ -276,20 +279,30 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                 
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 text-center">
                   {/* QRIS Image */}
-                  <div className="w-64 h-64 bg-white border-2 border-gray-200 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                  <div className="w-64 h-64 bg-white border-2 border-gray-200 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-lg overflow-hidden">
                     {process.env.NEXT_PUBLIC_QRIS_IMAGE_URL ? (
-                      <img 
+                      <Image 
                         src={process.env.NEXT_PUBLIC_QRIS_IMAGE_URL}
                         alt="QRIS Code"
+                        width={256}
+                        height={256}
                         className="w-full h-full object-contain rounded-xl"
                         onError={(e) => {
+                          console.error('QRIS image failed to load:', process.env.NEXT_PUBLIC_QRIS_IMAGE_URL);
                           e.currentTarget.style.display = 'none';
                           const fallback = e.currentTarget.nextElementSibling as HTMLElement;
                           if (fallback) fallback.style.display = 'flex';
                         }}
                       />
                     ) : null}
-                    <div className="flex flex-col items-center justify-center text-gray-400">
+                    <div 
+                      className="flex flex-col items-center justify-center text-gray-400"
+                      style={{display: process.env.NEXT_PUBLIC_QRIS_IMAGE_URL ? 'none' : 'flex'}}
+                    >
+                      <svg className="w-16 h-16 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                      </svg>
+                      <p className="text-sm text-center">QRIS Code<br />akan ditampilkan di sini</p>
                     </div>
                   </div>
                   

@@ -58,9 +58,9 @@ export async function PUT(
       )
     }
 
-    if (!name || !description || !price || !category || !file_url) {
+    if (!name || !description || !price || !category) {
       return NextResponse.json(
-        { error: 'Semua field wajib harus diisi' },
+        { error: 'Nama, deskripsi, harga, dan kategori wajib diisi' },
         { status: 400 }
       )
     }
@@ -142,6 +142,23 @@ export async function DELETE(
         { error: 'Produk tidak ditemukan' },
         { status: 404 }
       )
+    }
+
+    // Check if there are any remaining products
+    const remainingProductsCheck = await sql`
+      SELECT COUNT(*) as count FROM products
+    `
+
+    // If no products remain, reset the sequence
+    if (parseInt(remainingProductsCheck.rows[0].count) === 0) {
+      try {
+        await sql`
+          ALTER SEQUENCE products_id_seq RESTART WITH 1
+        `
+      } catch (sequenceError) {
+        console.warn('Could not reset sequence:', sequenceError)
+        // Continue even if sequence reset fails
+      }
     }
 
     return NextResponse.json({

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Product {
   id: number
@@ -52,12 +53,24 @@ export default function ProductGrid() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {[...Array(8)].map((_, index) => (
-          <div key={index} className="card animate-pulse">
-            <div className="w-full h-40 sm:h-48 bg-gray-300 rounded-lg mb-4"></div>
-            <div className="space-y-2">
-              <div className="h-3 sm:h-4 bg-gray-300 rounded"></div>
-              <div className="h-2 sm:h-3 bg-gray-300 rounded w-3/4"></div>
-              <div className="h-3 sm:h-4 bg-gray-300 rounded w-1/2"></div>
+          <div 
+            key={index} 
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 animate-pulse"
+            style={{animationDelay: `${index * 0.1}s`}}
+          >
+            <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg mb-4 shimmer relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+            </div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded shimmer relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+              </div>
+              <div className="h-3 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-3/4 shimmer relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+              </div>
+              <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-1/2 shimmer relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+              </div>
             </div>
           </div>
         ))}
@@ -94,18 +107,21 @@ export default function ProductGrid() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-      {products.map((product) => (
+      {products.map((product, index) => (
         <div 
           key={product.id} 
-          className="card hover:shadow-lg transition-all duration-300 group hover:-translate-y-1"
+          className="card hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 fade-in-up"
+          style={{animationDelay: `${index * 0.1}s`}}
         >
           {/* Product Image */}
           <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 bg-gray-100 rounded-lg overflow-hidden">
             {product.image_url ? (
-              <img 
+              <Image 
                 src={product.image_url} 
                 alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                width={300}
+                height={200}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 onError={(e) => {
                   // Fallback ke placeholder jika gambar gagal load
                   e.currentTarget.style.display = 'none'
@@ -125,37 +141,33 @@ export default function ProductGrid() {
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100">
               <Link 
                 href={`/products/${product.id}`}
-                className="btn-primary text-sm"
+                className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-all duration-300 transform scale-90 group-hover:scale-100"
               >
                 Lihat Detail
               </Link>
+            </div>
+            
+            {/* Category Badge */}
+            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
+              <span className="text-xs font-medium text-blue-600">{product.category}</span>
             </div>
           </div>
 
           {/* Product Info */}
           <div className="flex-1">
-            <div className="text-xs sm:text-sm text-blue-600 font-medium mb-1">
-              {product.category}
-            </div>
-            <h3 className="font-serif font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base leading-tight">
+            <h3 className="font-serif font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base leading-tight group-hover:text-blue-600 transition-colors duration-300">
               {product.name}
             </h3>
             <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
               {product.description}
             </p>
             <div className="flex items-center justify-between">
-              <div className="text-base sm:text-lg font-bold text-blue-600">
+              <div className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {formatPrice(product.price)}
               </div>
               <Link 
                 href={`/products/${product.id}`}
-                className="text-xs sm:text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium sm:hidden"
-              >
-                Detail →
-              </Link>
-              <Link 
-                href={`/products/${product.id}`}
-                className="hidden sm:inline-block text-sm text-gray-500 hover:text-blue-600 transition-colors"
+                className="text-xs sm:text-sm text-gray-500 hover:text-blue-600 transition-all duration-300 font-medium group-hover:translate-x-1"
               >
                 Detail →
               </Link>

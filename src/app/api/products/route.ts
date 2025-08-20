@@ -82,9 +82,9 @@ export async function POST(request: NextRequest) {
     
     const { name, description, price, category, file_url, image_url } = await request.json()
 
-    if (!name || !description || !price || !category || !file_url) {
+    if (!name || !description || !price || !category) {
       return NextResponse.json(
-        { error: 'Semua field wajib harus diisi' },
+        { error: 'Nama, deskripsi, harga, dan kategori wajib diisi' },
         { status: 400 }
       )
     }

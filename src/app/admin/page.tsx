@@ -105,12 +105,23 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       
+      const token = localStorage.getItem('token')
+      const headers = {
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+      
       // Fetch products
-      const productsResponse = await fetch('/api/products')
+      const productsResponse = await fetch('/api/products', {
+        headers,
+        credentials: 'include'
+      })
       const productsData = await productsResponse.json()
       
       // Fetch transactions
-      const transactionsResponse = await fetch('/api/transactions')
+      const transactionsResponse = await fetch('/api/transactions', {
+        headers,
+        credentials: 'include'
+      })
       const transactionsData = await transactionsResponse.json()
       
       if (productsResponse.ok) {
@@ -184,19 +195,30 @@ export default function AdminDashboard() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!productForm.name || !productForm.description || !productForm.price || !productForm.category) {
+      alert('Nama, deskripsi, harga, dan kategori wajib diisi')
+      return
+    }
+
     try {
+      const token = localStorage.getItem('token')
       const response = await fetch('/api/products', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...productForm,
           price: parseInt(productForm.price)
         })
       })
 
+      const data = await response.json()
+
       if (response.ok) {
+        alert('Produk berhasil ditambahkan!')
         setIsAddProductModalOpen(false)
         setProductForm({
           name: '',
@@ -207,30 +229,48 @@ export default function AdminDashboard() {
           image_url: ''
         })
         fetchData()
+      } else {
+        console.error('Add product error:', data)
+        alert(data.error || 'Gagal menambahkan produk')
       }
     } catch (error) {
       console.error('Error adding product:', error)
+      alert('Terjadi kesalahan saat menambahkan produk')
     }
   }
 
   const handleEditProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!selectedProduct) return
+    if (!selectedProduct) {
+      alert('Produk tidak dipilih')
+      return
+    }
+
+    if (!productForm.name || !productForm.description || !productForm.price || !productForm.category) {
+      alert('Nama, deskripsi, harga, dan kategori wajib diisi')
+      return
+    }
 
     try {
+      const token = localStorage.getItem('token')
       const response = await fetch(`/api/products/${selectedProduct.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...productForm,
           price: parseInt(productForm.price)
         })
       })
 
+      const data = await response.json()
+
       if (response.ok) {
+        alert('Produk berhasil diperbarui!')
         setIsEditProductModalOpen(false)
         setSelectedProduct(null)
         setProductForm({
@@ -242,9 +282,13 @@ export default function AdminDashboard() {
           image_url: ''
         })
         fetchData()
+      } else {
+        console.error('Update product error:', data)
+        alert(data.error || 'Gagal memperbarui produk')
       }
     } catch (error) {
       console.error('Error editing product:', error)
+      alert('Terjadi kesalahan saat memperbarui produk')
     }
   }
 
@@ -253,15 +297,27 @@ export default function AdminDashboard() {
 
     try {
       setDeletingProductId(productId)
+      const token = localStorage.getItem('token')
       const response = await fetch(`/api/products/${productId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include'
       })
 
+      const data = await response.json()
+
       if (response.ok) {
+        alert('Produk berhasil dihapus!')
         fetchData()
+      } else {
+        console.error('Delete product error:', data)
+        alert(data.error || 'Gagal menghapus produk')
       }
     } catch (error) {
       console.error('Error deleting product:', error)
+      alert('Terjadi kesalahan saat menghapus produk')
     } finally {
       setDeletingProductId(null)
     }
@@ -282,21 +338,31 @@ export default function AdminDashboard() {
 
   const handleTransactionAction = async (transactionId: number, action: 'approve' | 'reject') => {
     try {
+      const token = localStorage.getItem('token')
       const response = await fetch(`/api/transactions/${transactionId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         },
+        credentials: 'include',
         body: JSON.stringify({
           status: action === 'approve' ? 'approved' : 'rejected'
         })
       })
 
+      const data = await response.json()
+
       if (response.ok) {
+        alert(`Transaksi berhasil ${action === 'approve' ? 'disetujui' : 'ditolak'}!`)
         fetchData()
+      } else {
+        console.error('Transaction action error:', data)
+        alert(data.error || 'Gagal memproses transaksi')
       }
     } catch (error) {
       console.error('Error updating transaction:', error)
+      alert('Terjadi kesalahan saat memproses transaksi')
     }
   }
 
@@ -353,9 +419,12 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-lg mb-4 mx-auto">
+            <span className="text-white font-bold text-2xl">Z</span>
+          </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-transparent border-t-blue-600 border-r-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Memuat dashboard...</p>
         </div>
       </div>
@@ -363,20 +432,23 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg sm:text-xl">D</span>
+              <Link href="/" className="flex items-center space-x-2 group">
+                <div className="relative">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-110">
+                    <span className="text-white font-bold text-lg sm:text-xl">Z</span>
+                  </div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
                 </div>
-                <span className="text-lg sm:text-xl font-serif font-bold text-gray-900 hidden sm:block">
-                  Digital Store Admin
+                <span className="text-lg sm:text-xl font-serif font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent hidden sm:block">
+                  ZaynStore Admin
                 </span>
-                <span className="text-lg font-serif font-bold text-gray-900 sm:hidden">
+                <span className="text-lg font-serif font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent sm:hidden">
                   Admin
                 </span>
               </Link>
@@ -385,7 +457,7 @@ export default function AdminDashboard() {
               <button
                 onClick={fetchData}
                 disabled={loading}
-                className="inline-flex items-center px-2 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 text-xs sm:text-sm"
+                className="inline-flex items-center px-2 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl transition-all duration-300 disabled:opacity-50 text-xs sm:text-sm shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''} sm:mr-2`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -394,7 +466,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => setIsChangePasswordModalOpen(true)}
-                className="inline-flex items-center px-2 sm:px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-xs sm:text-sm"
+                className="inline-flex items-center px-2 sm:px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-300 text-xs sm:text-sm transform hover:scale-105"
                 title="Ubah Password"
               >
                 <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,7 +478,7 @@ export default function AdminDashboard() {
               <span className="text-gray-600 text-xs sm:text-sm hidden md:block">Hai, {user?.name}</span>
               <button
                 onClick={handleLogout}
-                className="btn-secondary text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all duration-300 transform hover:scale-105"
               >
                 Logout
               </button>
@@ -608,7 +680,7 @@ export default function AdminDashboard() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Kelola Produk</h2>
                 <button
                   onClick={() => setIsAddProductModalOpen(true)}
-                  className="btn-primary"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                 >
                   + Tambah Produk
                 </button>
