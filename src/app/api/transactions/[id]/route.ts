@@ -55,8 +55,7 @@ export async function PUT(
     // Generate download link if approved
     let downloadLink = null
     if (status === 'approved' && transaction.product_file_url) {
-      // In real implementation, this would be a secure download URL from Vercel Blob
-      // For now, we'll use the product file URL
+      // Use the product file URL as download link
       downloadLink = transaction.product_file_url
     }
 

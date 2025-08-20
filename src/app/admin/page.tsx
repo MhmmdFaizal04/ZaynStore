@@ -366,6 +366,33 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleFixDownloadLinks = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/fix-download-links', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include'
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert(`Berhasil memperbaiki ${data.count} transaksi yang download linknya belum ada!`)
+        fetchData() // Refresh data
+      } else {
+        console.error('Fix download links error:', data)
+        alert(data.error || 'Gagal memperbaiki download links')
+      }
+    } catch (error) {
+      console.error('Error fixing download links:', error)
+      alert('Terjadi kesalahan saat memperbaiki download links')
+    }
+  }
+
   const handlePasswordFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordForm({
       ...passwordForm,
@@ -767,7 +794,15 @@ export default function AdminDashboard() {
 
           {activeTab === 'transactions' && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Kelola Transaksi</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Kelola Transaksi</h2>
+                <button
+                  onClick={handleFixDownloadLinks}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                >
+                  🔧 Perbaiki Download Links
+                </button>
+              </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">

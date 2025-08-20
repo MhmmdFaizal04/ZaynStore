@@ -17,7 +17,8 @@ interface Transaction {
   amount: number
   status: 'pending' | 'approved' | 'rejected'
   payment_proof: string
-  download_link?: string
+  download_link: string | null
+  product_file_url: string
   created_at: string
 }
 
@@ -302,12 +303,12 @@ export default function ProfilePage() {
                             </div>
                             
                             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                              {transaction.status === 'approved' && transaction.download_link && (
+                              {transaction.status === 'approved' && (
                                 <button
-                                  onClick={() => handleDownload(transaction.id, transaction.download_link!)}
+                                  onClick={() => handleDownload(transaction.id, transaction.download_link || transaction.product_file_url || '#')}
                                   className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl text-sm transition-all duration-300 w-full sm:w-auto transform hover:scale-105 hover:shadow-lg"
                                 >
-                                  📥 Download
+                                  📥 Download File
                                 </button>
                               )}
                               
@@ -324,12 +325,6 @@ export default function ProfilePage() {
                               )}
                             </div>
                           </div>
-
-                          {transaction.status === 'approved' && !transaction.download_link && (
-                            <div className="mt-2 text-sm text-blue-600">
-                              ✅ Pembayaran disetujui. Link download sedang diproses...
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>

@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
         u.name as user_name,
         u.email as user_email,
         p.name as product_name,
-        p.price as product_price
+        p.price as product_price,
+        p.file_url as product_file_url
       FROM transactions t
       JOIN users u ON t.user_id = u.id
       JOIN products p ON t.product_id = p.id
