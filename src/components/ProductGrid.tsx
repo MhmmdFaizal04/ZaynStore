@@ -1,0 +1,168 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+
+interface Product {
+  id: number
+  name: string
+  description: string
+  price: number
+  image_url?: string
+  category: string
+  created_at: string
+}
+
+export default function ProductGrid() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/products?limit=12')
+      const data = await response.json()
+      
+      if (response.ok) {
+        setProducts(data.products || [])
+      } else {
+        setError(data.error || 'Gagal memuat produk')
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error)
+      setError('Terjadi kesalahan saat memuat produk')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR'
+    }).format(price)
+  }
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {[...Array(8)].map((_, index) => (
+          <div key={index} className="card animate-pulse">
+            <div className="w-full h-40 sm:h-48 bg-gray-300 rounded-lg mb-4"></div>
+            <div className="space-y-2">
+              <div className="h-3 sm:h-4 bg-gray-300 rounded"></div>
+              <div className="h-2 sm:h-3 bg-gray-300 rounded w-3/4"></div>
+              <div className="h-3 sm:h-4 bg-gray-300 rounded w-1/2"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 sm:py-12 px-4">
+        <div className="text-red-600 mb-4 text-sm sm:text-base">{error}</div>
+        <button 
+          onClick={fetchProducts}
+          className="btn-primary"
+        >
+          Coba Lagi
+        </button>
+      </div>
+    )
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-8 sm:py-12 px-4">
+        <div className="text-gray-500 mb-4 text-sm sm:text-base">
+          Belum ada produk yang tersedia.
+        </div>
+        <p className="text-xs sm:text-sm text-gray-400">
+          Admin belum menambahkan produk ke dalam sistem.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      {products.map((product) => (
+        <div 
+          key={product.id} 
+          className="card hover:shadow-lg transition-all duration-300 group hover:-translate-y-1"
+        >
+          {/* Product Image */}
+          <div className="relative w-full h-40 sm:h-48 mb-3 sm:mb-4 bg-gray-100 rounded-lg overflow-hidden">
+            {product.image_url ? (
+              <img 
+                src={product.image_url} 
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                onError={(e) => {
+                  // Fallback ke placeholder jika gambar gagal load
+                  e.currentTarget.style.display = 'none'
+                  const placeholder = e.currentTarget.nextElementSibling as HTMLElement
+                  if (placeholder) {
+                    placeholder.style.display = 'flex'
+                  }
+                }}
+              />
+            ) : null}
+            <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: product.image_url ? 'none' : 'flex'}}>
+              <svg className="w-12 h-12 sm:w-16 sm:h-16" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+              </svg>
+            </div>
+            {/* Overlay - Hidden on mobile, shown on hover for desktop */}
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <Link 
+                href={`/products/${product.id}`}
+                className="btn-primary text-sm"
+              >
+                Lihat Detail
+              </Link>
+            </div>
+          </div>
+
+          {/* Product Info */}
+          <div className="flex-1">
+            <div className="text-xs sm:text-sm text-blue-600 font-medium mb-1">
+              {product.category}
+            </div>
+            <h3 className="font-serif font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base leading-tight">
+              {product.name}
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
+              {product.description}
+            </p>
+            <div className="flex items-center justify-between">
+              <div className="text-base sm:text-lg font-bold text-blue-600">
+                {formatPrice(product.price)}
+              </div>
+              <Link 
+                href={`/products/${product.id}`}
+                className="text-xs sm:text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium sm:hidden"
+              >
+                Detail →
+              </Link>
+              <Link 
+                href={`/products/${product.id}`}
+                className="hidden sm:inline-block text-sm text-gray-500 hover:text-blue-600 transition-colors"
+              >
+                Detail →
+              </Link>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}

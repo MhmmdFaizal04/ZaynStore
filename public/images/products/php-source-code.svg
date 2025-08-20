@@ -1,0 +1,12 @@
+<!-- SVG Placeholder untuk Source Code PHP -->
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <text x="200" y="130" text-anchor="middle" font-family="monospace" font-size="16" fill="#1e293b">Source Code</text>
+  <text x="200" y="150" text-anchor="middle" font-family="monospace" font-size="16" fill="#1e293b">PHP Application</text>
+  <rect x="50" y="50" width="300" height="200" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="70" y="80" font-family="monospace" font-size="12" fill="#3b82f6">&lt;?php</text>
+  <text x="70" y="100" font-family="monospace" font-size="12" fill="#059669">function main() {</text>
+  <text x="90" y="120" font-family="monospace" font-size="12" fill="#dc2626">echo "Hello World";</text>
+  <text x="70" y="140" font-family="monospace" font-size="12" fill="#059669">}</text>
+  <text x="70" y="160" font-family="monospace" font-size="12" fill="#3b82f6">?&gt;</text>
+</svg>
