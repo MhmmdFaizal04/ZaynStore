@@ -154,7 +154,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
         <Header />
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
             <p className="mt-4 text-gray-600">Memuat data checkout...</p>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
               Link download akan dikirimkan ke email Anda setelah pembayaran dikonfirmasi.
             </p>
             <div className="space-y-4">
-              <Link href="/profile/orders" className="btn-primary">
+              <Link href="/profile?tab=orders" className="btn-primary">
                 Lihat Status Pesanan
               </Link>
               <Link href="/" className="btn-secondary block">
@@ -248,7 +248,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{product.name}</h3>
                       <p className="text-sm text-gray-500">{product.category}</p>
-                      <p className="text-lg font-bold text-primary-600 mt-1">
+                      <p className="text-lg font-bold text-black mt-1">
                         {formatCurrency(product.price)}
                       </p>
                     </div>
@@ -257,7 +257,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between items-center text-lg font-semibold">
                       <span>Total Pembayaran:</span>
-                      <span className="text-primary-600">{formatCurrency(product.price)}</span>
+                      <span className="text-black">{formatCurrency(product.price)}</span>
                     </div>
                   </div>
                 </div>
@@ -271,13 +271,13 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
               {/* QRIS Code */}
               <div className="mb-6">
                 <h3 className="font-medium text-gray-900 mb-3 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 mr-2 text-black" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
                   </svg>
                   Scan QRIS untuk Pembayaran
                 </h3>
                 
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 text-center">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-6 text-center">
                   {/* QRIS Image */}
                   <div className="w-64 h-64 bg-white border-2 border-gray-200 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-lg overflow-hidden">
                     {process.env.NEXT_PUBLIC_QRIS_IMAGE_URL ? (
@@ -315,7 +315,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                       {process.env.NEXT_PUBLIC_PAYMENT_INFO || 'Scan dengan aplikasi mobile banking atau e-wallet Anda'}
                     </p>
                     <div className="bg-white rounded-lg px-4 py-2 inline-block">
-                      <p className="text-2xl font-bold text-blue-600">
+                      <p className="text-2xl font-bold text-black">
                         {product && formatCurrency(product.price)}
                       </p>
                     </div>
@@ -354,7 +354,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                     accept="image/*"
                     onChange={handleFileChange}
                     required
-                    className="form-input file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                    className="form-input file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-black hover:file:bg-gray-100"
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Format: JPG, PNG, atau GIF. Maksimal 5MB.
@@ -366,9 +366,9 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                   )}
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Petunjuk Pembayaran:</h4>
-                  <ol className="text-sm text-blue-800 space-y-1">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Petunjuk Pembayaran:</h4>
+                  <ol className="text-sm text-gray-800 space-y-1">
                     <li>1. Scan QRIS code di atas menggunakan aplikasi mobile banking</li>
                     <li>2. Pastikan nominal pembayaran sesuai dengan total pesanan</li>
                     <li>3. Lakukan pembayaran dan simpan bukti transaksi</li>

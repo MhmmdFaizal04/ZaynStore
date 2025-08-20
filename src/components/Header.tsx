@@ -50,17 +50,16 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
             <div className="relative">
-              <div className={`bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg group-hover:shadow-xl ${
+              <div className={`bg-black rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg group-hover:shadow-xl ${
                 isScrolled ? 'w-8 h-8' : 'w-10 h-10'
               }`}>
                 <span className={`text-white font-bold transition-all duration-300 ${
                   isScrolled ? 'text-lg' : 'text-xl'
                 }`}>Z</span>
               </div>
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
             </div>
             <div className="group-hover:scale-105 transition-transform duration-300">
-              <span className={`font-serif font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent transition-all duration-300 ${
+              <span className={`font-serif font-bold text-black transition-all duration-300 ${
                 isScrolled ? 'text-lg sm:text-xl' : 'text-lg sm:text-2xl'
               }`}>
                 Zayn Store
@@ -75,17 +74,17 @@ export default function Header() {
           <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             <Link 
               href="/" 
-              className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 text-sm xl:text-base relative group"
+              className="text-gray-700 hover:text-black font-medium transition-all duration-300 text-sm xl:text-base relative group"
             >
               Beranda
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link 
               href="/products" 
-              className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 text-sm xl:text-base relative group"
+              className="text-gray-700 hover:text-black font-medium transition-all duration-300 text-sm xl:text-base relative group"
             >
               Produk
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black group-hover:w-full transition-all duration-300"></span>
             </Link>
             
             {user ? (
@@ -93,17 +92,17 @@ export default function Header() {
                 {user.role === 'admin' ? (
                   <Link 
                     href="/admin" 
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 text-sm xl:text-base"
+                    className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 text-sm xl:text-base"
                   >
                     Admin Panel
                   </Link>
                 ) : (
                   <Link 
                     href="/profile" 
-                    className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 text-sm xl:text-base relative group"
+                    className="text-gray-700 hover:text-black font-medium transition-all duration-300 text-sm xl:text-base relative group"
                   >
                     Pesanan Saya
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300"></span>
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black group-hover:w-full transition-all duration-300"></span>
                   </Link>
                 )}
                 
@@ -127,14 +126,14 @@ export default function Header() {
               <>
                 <Link 
                   href="/login" 
-                  className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 text-sm xl:text-base relative group"
+                  className="text-gray-700 hover:text-black font-medium transition-all duration-300 text-sm xl:text-base relative group"
                 >
                   Masuk
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 group-hover:w-full transition-all duration-300"></span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black group-hover:w-full transition-all duration-300"></span>
                 </Link>
                 <Link 
                   href="/register" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 text-sm xl:text-base"
+                  className="bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 text-sm xl:text-base"
                 >
                   Daftar
                 </Link>
@@ -170,14 +169,14 @@ export default function Header() {
             <nav className="flex flex-col space-y-2">
               <Link 
                 href="/" 
-                className="text-gray-700 hover:text-blue-600 font-medium py-3 px-4 rounded-lg hover:bg-blue-50 transition-all duration-300 transform hover:translate-x-2"
+                className="text-gray-700 hover:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Beranda
               </Link>
               <Link 
                 href="/products" 
-                className="text-gray-700 hover:text-blue-600 font-medium py-3 px-4 rounded-lg hover:bg-blue-50 transition-all duration-300 transform hover:translate-x-2"
+                className="text-gray-700 hover:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:translate-x-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Produk
@@ -188,7 +187,7 @@ export default function Header() {
                   {user.role === 'admin' ? (
                     <Link 
                       href="/admin" 
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:translate-x-2"
+                      className="bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 transform hover:translate-x-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Admin Panel
@@ -196,7 +195,7 @@ export default function Header() {
                   ) : (
                     <Link 
                       href="/profile" 
-                      className="text-gray-700 hover:text-blue-600 font-medium py-3 px-4 rounded-lg hover:bg-blue-50 transition-all duration-300 transform hover:translate-x-2"
+                      className="text-gray-700 hover:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:translate-x-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Pesanan Saya
@@ -223,14 +222,14 @@ export default function Header() {
                 <>
                   <Link 
                     href="/login" 
-                    className="text-gray-700 hover:text-blue-600 font-medium py-3 px-4 rounded-lg hover:bg-blue-50 transition-all duration-300 transform hover:translate-x-2"
+                    className="text-gray-700 hover:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:translate-x-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Masuk
                   </Link>
                   <Link 
                     href="/register" 
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 text-center transform hover:translate-x-2"
+                    className="bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 text-center transform hover:translate-x-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Daftar

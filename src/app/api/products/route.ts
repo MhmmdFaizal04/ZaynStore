@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
     const search = searchParams.get('search')
+    const exclude = searchParams.get('exclude')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
     const offset = (page - 1) * limit
@@ -31,6 +32,12 @@ export async function GET(request: NextRequest) {
       paramIndex++
     }
 
+    if (exclude) {
+      query += ` AND id != $${paramIndex}`
+      params.push(parseInt(exclude))
+      paramIndex++
+    }
+
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`
     params.push(limit, offset)
 
@@ -50,6 +57,12 @@ export async function GET(request: NextRequest) {
     if (search) {
       countQuery += ` AND (name ILIKE $${countParamIndex} OR description ILIKE $${countParamIndex})`
       countParams.push(`%${search}%`)
+      countParamIndex++
+    }
+
+    if (exclude) {
+      countQuery += ` AND id != $${countParamIndex}`
+      countParams.push(parseInt(exclude))
       countParamIndex++
     }
 

@@ -16,9 +16,9 @@ export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0)
 
   const features = [
-    { icon: "🚀", title: "Kualitas Premium", desc: "File berkualitas tinggi" },
-    { icon: "⚡", title: "Download Instan", desc: "Akses langsung setelah bayar" },
-    { icon: "🔒", title: "Aman & Terpercaya", desc: "Transaksi 100% aman" }
+    { icon: "💎", title: "Kualitas Premium", desc: "Produk digital berkualitas" },
+    { icon: "📦", title: "Paket Lengkap", desc: "Dokumentasi disertakan" },
+    { icon: "⚡", title: "Akses Instan", desc: "Download langsung" }
   ]
 
   useEffect(() => {
@@ -32,35 +32,18 @@ export default function Hero() {
     
     // Auto slide features
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % 3) // Use fixed number instead of features.length
+      setCurrentSlide((prev) => (prev + 1) % features.length)
     }, 3000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [features.length])
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex items-center">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-40 left-1/2 w-60 h-60 bg-gradient-to-br from-indigo-400 to-cyan-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
-      </div>
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-30 animate-ping"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
-          ></div>
-        ))}
+    <section className="relative overflow-hidden bg-white min-h-screen flex items-center">
+      {/* Subtle Background Elements */}
+      <div className="absolute inset-0 overflow-hidden opacity-30">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gray-200 rounded-full filter blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-300 rounded-full filter blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -70,59 +53,71 @@ export default function Hero() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
             <div className="space-y-6">
-              <div className="inline-flex items-center px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border border-white/20 shadow-lg">
-                <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                <span className="text-sm font-medium text-gray-700">✨ Terpercaya & Berkualitas</span>
+              <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm">
+                <span className="w-2 h-2 bg-black rounded-full mr-2 animate-pulse"></span>
+                <span className="text-sm font-medium text-gray-700">✨ Premium Digital Store</span>
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold leading-tight">
-                <span className="block text-gray-900 fade-in-up">Platform</span>
-                <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent fade-in-up" style={{animationDelay: '0.2s'}}>
-                  Digital Store
+                <span className="block text-black fade-in-up">Premium</span>
+                <span className="block text-black fade-in-up" style={{animationDelay: '0.2s'}}>
+                  Cheat
                 </span>
-                <span className="block text-gray-900 fade-in-up" style={{animationDelay: '0.4s'}}>Terpercaya</span>
+                <span className="block text-gray-600 fade-in-up" style={{animationDelay: '0.4s'}}>Murah</span>
               </h1>
               
               <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed fade-in-up" style={{animationDelay: '0.6s'}}>
-                Temukan berbagai file digital berkualitas tinggi untuk kebutuhan bisnis, 
-                kreatif, dan edukasi Anda. <span className="font-semibold text-blue-600">Akses instan setelah pembelian.</span>
+                Temukan koleksi produk digital berkualitas tinggi kami. 
+                Solusi profesional untuk kebutuhan modern. <span className="font-semibold text-black">Download instan terjamin.</span>
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 fade-in-up" style={{animationDelay: '0.8s'}}>
-              <Link 
-                href="/products" 
-                className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
-              >
-                <span className="flex items-center justify-center">
-                  Jelajahi Produk
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </span>
-              </Link>
-              
-              {!user && (
                 <Link 
-                  href="/register" 
-                  className="group bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:bg-white"
+                  href="/products" 
+                  className="group bg-black text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <span className="flex items-center justify-center">
-                    Daftar Sekarang
+                    Jelajahi Koleksi
                     <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
                   </span>
                 </Link>
-              )}
+                
+                {!user ? (
+                  <Link 
+                    href="/register" 
+                    className="group bg-white border-2 border-black text-black px-8 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:bg-gray-50"
+                  >
+                    <span className="flex items-center justify-center">
+                      Daftar Sekarang
+                      <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </Link>
+                ) : (
+                  <button 
+                    onClick={() => alert('Anda sudah login')}
+                    className="group bg-white border-2 border-black text-black px-8 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:bg-gray-50"
+                  >
+                    <span className="flex items-center justify-center">
+                      Daftar Sekarang
+                      <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </button>
+                )}
               
               {user && user.role === 'customer' && (
                 <Link 
                   href="/profile" 
-                  className="group bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:bg-white"
+                  className="group bg-white border-2 border-black text-black px-8 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:bg-gray-50"
                 >
                   <span className="flex items-center justify-center">
-                    Pesanan Saya
+                    Download Saya
                     <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -132,18 +127,18 @@ export default function Hero() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/30 fade-in-up" style={{animationDelay: '1s'}}>
+            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200 fade-in-up" style={{animationDelay: '1s'}}>
               <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">100+</div>
-                <div className="text-sm text-gray-600">Produk Digital</div>
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-2">500+</div>
+                <div className="text-sm text-gray-500">Produk</div>
               </div>
               <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">1000+</div>
-                <div className="text-sm text-gray-600">Pelanggan Puas</div>
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-2">2K+</div>
+                <div className="text-sm text-gray-500">Pelanggan</div>
               </div>
               <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent mb-2">24/7</div>
-                <div className="text-sm text-gray-600">Akses Download</div>
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-2">24/7</div>
+                <div className="text-sm text-gray-500">Dukungan</div>
               </div>
             </div>
           </div>
@@ -154,12 +149,12 @@ export default function Hero() {
           }`}>
             <div className="relative">
               {/* Main Feature Card */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
                 <div className="text-center space-y-6">
                   <div className="text-6xl animate-bounce">
                     {features[currentSlide].icon}
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-2xl font-bold text-black">
                     {features[currentSlide].title}
                   </h3>
                   <p className="text-gray-600 text-lg">
@@ -174,7 +169,7 @@ export default function Hero() {
                         onClick={() => setCurrentSlide(index)}
                         className={`w-3 h-3 rounded-full transition-all duration-300 ${
                           index === currentSlide 
-                            ? 'bg-blue-600 scale-125' 
+                            ? 'bg-black scale-125' 
                             : 'bg-gray-300 hover:bg-gray-400'
                         }`}
                       />
@@ -184,18 +179,18 @@ export default function Hero() {
               </div>
 
               {/* Floating Elements */}
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full opacity-80 animate-ping"></div>
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full opacity-60 animate-pulse"></div>
+              <div className="absolute -top-4 -right-4 w-20 h-20 bg-gray-300 rounded-full opacity-50 animate-ping"></div>
+              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gray-400 rounded-full opacity-30 animate-pulse"></div>
               
               {/* Secondary Cards */}
-              <div className="absolute -right-8 top-1/2 transform -translate-y-1/2 bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/30 floating-animation" style={{animationDelay: '1s'}}>
-                <div className="text-2xl mb-2">💎</div>
-                <div className="text-xs font-medium text-gray-700">Premium Quality</div>
+              <div className="absolute -right-8 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200 floating-animation" style={{animationDelay: '1s'}}>
+                <div className="text-2xl mb-2">📱</div>
+                <div className="text-xs font-medium text-gray-700">Aplikasi</div>
               </div>
               
-              <div className="absolute -left-8 top-1/4 bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/30 floating-animation" style={{animationDelay: '2s'}}>
-                <div className="text-2xl mb-2">⚡</div>
-                <div className="text-xs font-medium text-gray-700">Fast Download</div>
+              <div className="absolute -left-8 top-1/4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200 floating-animation" style={{animationDelay: '2s'}}>
+                <div className="text-2xl mb-2">🎨</div>
+                <div className="text-xs font-medium text-gray-700">Desain</div>
               </div>
             </div>
           </div>

@@ -106,10 +106,10 @@ export default function ProductsPage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-blue-100 py-8 sm:py-12">
+      <section className="bg-white py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-gray-900 mb-3 sm:mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-black mb-3 sm:mb-4">
               Jelajahi Produk
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-xl lg:max-w-2xl mx-auto leading-relaxed">
@@ -131,7 +131,7 @@ export default function ProductsPage() {
                   placeholder="Cari produk..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                  className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-sm sm:text-base"
                 />
                 <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none">
                   <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +146,7 @@ export default function ProductsPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-sm sm:text-base"
               >
                 {categories.map((category) => (
                   <option key={category} value={category === 'All' ? '' : category}>
@@ -159,7 +159,7 @@ export default function ProductsPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-sm sm:text-base"
               >
                 <option value="newest">Terbaru</option>
                 <option value="name">Nama A-Z</option>
@@ -278,7 +278,7 @@ export default function ProductsPage() {
 
                   {/* Product Info */}
                   <div className="flex-1">
-                    <div className="text-xs text-primary-600 font-medium mb-1">
+                    <div className="text-xs text-black font-medium mb-1">
                       {product.category}
                     </div>
                     <h3 className="font-serif font-semibold text-gray-900 mb-2 line-clamp-2">
@@ -288,12 +288,12 @@ export default function ProductsPage() {
                       {product.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="text-lg font-bold text-primary-600">
+                      <div className="text-lg font-bold text-black">
                         {formatPrice(product.price)}
                       </div>
                       <Link 
                         href={`/products/${product.id}`}
-                        className="text-sm text-gray-500 hover:text-primary-600 transition-colors"
+                        className="text-sm text-gray-500 hover:text-black transition-colors"
                       >
                         Detail →
                       </Link>

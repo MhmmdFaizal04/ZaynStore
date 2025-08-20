@@ -20,7 +20,9 @@ interface Product {
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const [product, setProduct] = useState<Product | null>(null)
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [relatedLoading, setRelatedLoading] = useState(true)
   const [error, setError] = useState('')
   const [user, setUser] = useState<any>(null)
   const router = useRouter()
@@ -42,6 +44,22 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     }
   }, [params.id])
 
+  const fetchRelatedProducts = useCallback(async () => {
+    try {
+      setRelatedLoading(true)
+      const response = await fetch(`/api/products?limit=3&exclude=${params.id}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setRelatedProducts(data.products || [])
+      }
+    } catch (error) {
+      console.error('Error fetching related products:', error)
+    } finally {
+      setRelatedLoading(false)
+    }
+  }, [params.id])
+
   useEffect(() => {
     // Check if user is logged in
     const userData = localStorage.getItem('user')
@@ -51,7 +69,16 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
     // Fetch product details
     fetchProduct()
-  }, [fetchProduct])
+    // Fetch related products
+    fetchRelatedProducts()
+  }, [fetchProduct, fetchRelatedProducts])
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR'
+    }).format(price)
+  }
 
   const handleBuyClick = () => {
     if (!user) {
@@ -117,9 +144,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           {/* Breadcrumb */}
           <nav className="mb-8">
             <ol className="flex items-center space-x-2 text-sm text-gray-500">
-              <li><Link href="/" className="hover:text-primary-600">Beranda</Link></li>
+              <li><Link href="/" className="hover:text-black">Beranda</Link></li>
               <li>/</li>
-              <li><Link href="/products" className="hover:text-primary-600">Produk</Link></li>
+              <li><Link href="/products" className="hover:text-black">Produk</Link></li>
               <li>/</li>
               <li className="text-gray-900">{product.name}</li>
             </ol>
@@ -169,7 +196,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               {/* Header */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-black">
                     {product.category}
                   </span>
                   <span className="text-xs text-gray-500">
@@ -182,7 +209,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 </h1>
                 
                 <div className="flex items-baseline gap-4">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-600">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black">
                     {formatCurrency(product.price)}
                   </div>
                   <div className="text-sm text-gray-500 line-through">
@@ -197,7 +224,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               {/* Description */}
               <div className="prose prose-gray max-w-none">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Deskripsi Produk
@@ -208,9 +235,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               </div>
 
               {/* Features */}
-              <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl p-6">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Yang Anda Dapatkan
@@ -242,7 +269,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   
                   <button
                     onClick={handleBuyClick}
-                    className="w-full bg-gradient-to-r from-primary-600 to-blue-600 hover:from-primary-700 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg"
+                    className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg"
                   >
                     {user ? (
                       <span className="flex items-center justify-center">
@@ -263,7 +290,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   
                   {!user && (
                     <p className="text-sm text-gray-500 text-center mt-3">
-                      <Link href="/register" className="text-primary-600 hover:text-primary-500 font-medium">
+                      <Link href="/register" className="text-black hover:text-gray-800 font-medium">
                         Belum punya akun? Daftar sekarang →
                       </Link>
                     </p>
@@ -311,70 +338,76 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Related product cards would go here */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
-            <div className="aspect-video bg-gradient-to-br from-primary-100 to-blue-100 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-3xl mb-2">🛒</div>
-                <p className="text-sm text-gray-600">Template E-commerce</p>
+        {relatedLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+                <div className="aspect-video bg-gray-200"></div>
+                <div className="p-6">
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-4 w-3/4"></div>
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">Template E-commerce Modern</h3>
-              <p className="text-sm text-gray-600 mb-4">Template website e-commerce responsive dengan fitur lengkap</p>
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-primary-600">Rp 299.000</span>
-                <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                  Lihat Detail →
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
-            <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-3xl mb-2">📚</div>
-                <p className="text-sm text-gray-600">E-book Tutorial</p>
+        ) : relatedProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedProducts.map((relatedProduct) => (
+              <div key={relatedProduct.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
+                <div className="aspect-video bg-gray-100 flex items-center justify-center relative overflow-hidden">
+                  {relatedProduct.image_url ? (
+                    <Image 
+                      src={relatedProduct.image_url} 
+                      alt={relatedProduct.name}
+                      width={400}
+                      height={225}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        const placeholder = e.currentTarget.nextElementSibling as HTMLElement
+                        if (placeholder) {
+                          placeholder.style.display = 'flex'
+                        }
+                      }}
+                    />
+                  ) : null}
+                  <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: relatedProduct.image_url ? 'none' : 'flex'}}>
+                    <div className="text-center">
+                      <div className="text-3xl mb-2">�</div>
+                      <p className="text-sm text-gray-600">{relatedProduct.category}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{relatedProduct.name}</h3>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{relatedProduct.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-black">{formatPrice(relatedProduct.price)}</span>
+                    <Link 
+                      href={`/products/${relatedProduct.id}`}
+                      className="text-sm text-black hover:text-gray-800 font-medium"
+                    >
+                      Lihat Detail →
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">E-book Marketing Digital</h3>
-              <p className="text-sm text-gray-600 mb-4">Panduan lengkap marketing digital untuk pemula hingga mahir</p>
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-primary-600">Rp 149.000</span>
-                <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                  Lihat Detail →
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
-            <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-3xl mb-2">💼</div>
-                <p className="text-sm text-gray-600">Source Code</p>
-              </div>
-            </div>
-            <div className="p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">Source Code CRM System</h3>
-              <p className="text-sm text-gray-600 mb-4">Source code lengkap sistem CRM dengan fitur modern</p>
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-primary-600">Rp 499.000</span>
-                <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                  Lihat Detail →
-                </button>
-              </div>
-            </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Tidak ada produk lainnya yang tersedia saat ini.</p>
           </div>
-        </div>
+        )}
 
         <div className="text-center mt-8">
           <Link 
             href="/products"
-            className="inline-flex items-center px-6 py-3 bg-white border border-primary-300 rounded-lg text-primary-600 hover:bg-primary-50 transition-colors duration-300 font-medium"
+            className="inline-flex items-center px-6 py-3 bg-black border border-black rounded-lg text-white hover:bg-gray-800 transition-colors duration-300 font-medium"
           >
             Lihat Semua Produk
             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

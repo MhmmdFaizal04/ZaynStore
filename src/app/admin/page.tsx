@@ -583,36 +583,36 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-lg mb-4 mx-auto">
+          <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center shadow-lg mb-4 mx-auto border border-gray-200">
             <span className="text-white font-bold text-2xl">Z</span>
           </div>
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-transparent border-t-blue-600 border-r-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat dashboard...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-transparent border-t-black border-r-gray-400 mx-auto mb-4"></div>
+          <p className="text-black">Loading Admin Dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <Link href="/" className="flex items-center space-x-2 group">
                 <div className="relative">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-110">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-110">
                     <span className="text-white font-bold text-lg sm:text-xl">Z</span>
                   </div>
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
+                  <div className="absolute -inset-1 bg-black rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
                 </div>
-                <span className="text-lg sm:text-xl font-serif font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent hidden sm:block">
+                <span className="text-lg sm:text-xl font-serif font-bold text-black hidden sm:block">
                   ZaynStore Admin
                 </span>
-                <span className="text-lg font-serif font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent sm:hidden">
+                <span className="text-lg font-serif font-bold text-black sm:hidden">
                   Admin
                 </span>
               </Link>
@@ -621,12 +621,12 @@ export default function AdminDashboard() {
               <button
                 onClick={fetchData}
                 disabled={loading}
-                className="inline-flex items-center px-2 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl transition-all duration-300 disabled:opacity-50 text-xs sm:text-sm shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center px-2 sm:px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-xl transition-all duration-300 disabled:opacity-50 text-xs sm:text-sm shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''} sm:mr-2`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                <span className="hidden sm:inline">{loading ? 'Memuat...' : 'Refresh'}</span>
+                <span className="hidden sm:inline">{loading ? '🔄 Loading...' : '🚀 Refresh'}</span>
               </button>
               <button
                 onClick={() => setIsChangePasswordModalOpen(true)}
@@ -653,88 +653,110 @@ export default function AdminDashboard() {
 
       <div className="flex flex-col lg:flex-row">
         {/* Mobile Navigation */}
-        <div className="lg:hidden bg-white border-b border-gray-200">
-          <div className="px-4 py-3">
+        <div className="lg:hidden bg-white border-b border-gray-200 shadow-sm">
+          <div className="px-4 py-4">
             <select
               value={activeTab}
               onChange={(e) => setActiveTab(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full px-4 py-3 bg-white border border-gray-300 text-black rounded-xl focus:ring-2 focus:ring-black focus:border-black text-sm font-medium"
             >
-              <option value="dashboard">📊 Dashboard</option>
-              <option value="products">📦 Kelola Produk</option>
-              <option value="transactions">💳 Transaksi</option>
-              <option value="members">👥 Kelola Member</option>
+              <option value="dashboard">Dashboard</option>
+              <option value="products">Kelola Produk</option>
+              <option value="transactions">Transaksi</option>
+              <option value="members">Member</option>
             </select>
           </div>
         </div>
 
         {/* Sidebar - Desktop Only */}
-        <div className="hidden lg:block w-64 bg-white shadow-sm min-h-screen">
+        <div className="hidden lg:block w-72 bg-white shadow-sm min-h-screen border-r border-gray-200">
           <nav className="p-6">
-            <ul className="space-y-2">
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">Admin Panel</h2>
+              <p className="text-sm text-gray-500">Manajemen Penjualan Digital</p>
+            </div>
+            <ul className="space-y-3">
               <li>
                 <button
                   onClick={() => setActiveTab('dashboard')}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors flex items-center gap-3 ${
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium ${
                     activeTab === 'dashboard'
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-black text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-black'
                   }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  Dashboard
+                  <div className={`p-2 rounded-lg ${
+                    activeTab === 'dashboard' ? 'bg-white/20' : 'bg-gray-100'
+                  }`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <span>Dashboard</span>
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => setActiveTab('products')}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors flex items-center gap-3 ${
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium ${
                     activeTab === 'products'
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-black text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-black'
                   }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                  Produk
+                  <div className={`p-2 rounded-lg ${
+                    activeTab === 'products' ? 'bg-white/20' : 'bg-gray-100'
+                  }`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <span>Kelola Produk</span>
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => setActiveTab('transactions')}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors flex items-center gap-3 ${
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium ${
                     activeTab === 'transactions'
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-black text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-black'
                   }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                  <span className="flex-1">Transaksi</span>
-                  {pendingNotifications > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
-                      {pendingNotifications}
-                    </span>
-                  )}
+                  <div className={`p-2 rounded-lg ${
+                    activeTab === 'transactions' ? 'bg-white/20' : 'bg-gray-100'
+                  }`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3-3V8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 flex items-center justify-between">
+                    <span>Transaksi</span>
+                    {pendingNotifications > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center font-bold">
+                        {pendingNotifications}
+                      </span>
+                    )}
+                  </div>
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => setActiveTab('members')}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors flex items-center gap-3 ${
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium ${
                     activeTab === 'members'
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-black text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-black'
                   }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                  Members
+                  <div className={`p-2 rounded-lg ${
+                    activeTab === 'members' ? 'bg-white/20' : 'bg-gray-100'
+                  }`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                  </div>
+                  <span>Member</span>
                 </button>
               </li>
             </ul>
@@ -742,29 +764,29 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
           {activeTab === 'dashboard' && (
             <div>
               {/* Dashboard Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200">
                   <div className="flex items-center">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-gray-100 rounded-xl">
+                      <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                     </div>
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Produk</p>
+                      <p className="text-sm font-medium text-gray-600">Total Products</p>
                       <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200">
                   <div className="flex items-center">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-gray-100 rounded-xl">
+                      <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                       </svg>
                     </div>
@@ -880,13 +902,13 @@ export default function AdminDashboard() {
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={handleResetProductSequence}
-                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                    className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
                   >
-                    🔄 Reset ID Sequence
+                    Reset ID Sequence
                   </button>
                   <button
                     onClick={() => setIsAddProductModalOpen(true)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                    className="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                   >
                     + Tambah Produk
                   </button>
@@ -979,9 +1001,9 @@ export default function AdminDashboard() {
                 <div className="flex gap-2">
                   <button
                     onClick={handleResetTransactionSequence}
-                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                    className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
                   >
-                    🔄 Reset ID Sequence
+                    Reset ID Sequence
                   </button>
                   <button
                     onClick={handleFixDownloadLinks}
@@ -1176,7 +1198,7 @@ export default function AdminDashboard() {
       {/* Add Product Modal */}
       {isAddProductModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh]">
             <div className="p-6">
               <h2 className="text-xl font-bold mb-4">Tambah Produk Baru</h2>
               <form onSubmit={handleAddProduct} className="space-y-4">
@@ -1271,7 +1293,7 @@ export default function AdminDashboard() {
       {/* Edit Product Modal */}
       {isEditProductModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh]">
             <div className="p-6">
               <h2 className="text-xl font-bold mb-4">Edit Produk</h2>
               <form onSubmit={handleEditProduct} className="space-y-4">

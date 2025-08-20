@@ -2,22 +2,21 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-8 sm:py-12">
+    <footer className="bg-black text-white py-8 sm:py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-2">
             <div className="flex items-center space-x-2 mb-3 sm:mb-4">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg sm:text-xl">D</span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-lg sm:text-xl">Z</span>
               </div>
               <span className="text-lg sm:text-xl font-serif font-bold">
-                Digital Store
+                Zayn Store
               </span>
             </div>
             <p className="text-gray-400 mb-4 sm:mb-6 max-w-md text-sm sm:text-base leading-relaxed">
-              Platform penjualan file digital terpercaya yang menyediakan berbagai 
-              macam produk berkualitas tinggi untuk kebutuhan bisnis dan kreatif Anda.
+              Premium digital store offering high-quality products and professional solutions for modern needs.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Twitter">
@@ -40,29 +39,29 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="sm:mt-0">
-            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Menu Cepat</h3>
+            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link href="/" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Beranda</Link></li>
-              <li><Link href="/products" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Produk</Link></li>
+              <li><Link href="/" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Home</Link></li>
+              <li><Link href="/products" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Products</Link></li>
               <li><Link href="/login" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Login</Link></li>
-              <li><Link href="/register" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Daftar</Link></li>
+              <li><Link href="/register" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Register</Link></li>
             </ul>
           </div>
 
           {/* Contact Info */}
           <div className="sm:mt-0">
-            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Informasi</h3>
+            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Information</h3>
             <ul className="space-y-2">
-              <li><span className="text-gray-400 text-sm sm:text-base">Email: support@digitalstore.com</span></li>
-              <li><span className="text-gray-400 text-sm sm:text-base">Platform aman & terpercaya</span></li>
-              <li><span className="text-gray-400 text-sm sm:text-base">Pembayaran QRIS</span></li>
+              <li><span className="text-gray-400 text-sm sm:text-base">Email: support@zaynstore.com</span></li>
+              <li><span className="text-gray-400 text-sm sm:text-base">Secure platform</span></li>
+              <li><span className="text-gray-400 text-sm sm:text-base">QRIS payment</span></li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center">
           <p className="text-gray-400 text-xs sm:text-sm">
-            © 2025 Digital Store. Semua hak cipta dilindungi.
+            © 2025 Zayn Store. All rights reserved.
           </p>
         </div>
       </div>

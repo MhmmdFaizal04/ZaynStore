@@ -58,18 +58,18 @@ export default function ProductGrid() {
             className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 animate-pulse"
             style={{animationDelay: `${index * 0.1}s`}}
           >
-            <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg mb-4 shimmer relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+            <div className="aspect-square bg-gray-200 rounded-lg mb-4 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>
             </div>
             <div className="space-y-3">
-              <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded shimmer relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+              <div className="h-4 bg-gray-200 rounded relative overflow-hidden">
+                <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>
               </div>
-              <div className="h-3 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-3/4 shimmer relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>
               </div>
-              <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-1/2 shimmer relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -149,25 +149,25 @@ export default function ProductGrid() {
             
             {/* Category Badge */}
             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
-              <span className="text-xs font-medium text-blue-600">{product.category}</span>
+              <span className="text-xs font-medium text-black">{product.category}</span>
             </div>
           </div>
 
           {/* Product Info */}
           <div className="flex-1">
-            <h3 className="font-serif font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base leading-tight group-hover:text-blue-600 transition-colors duration-300">
+            <h3 className="font-serif font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base leading-tight group-hover:text-black transition-colors duration-300">
               {product.name}
             </h3>
             <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
               {product.description}
             </p>
             <div className="flex items-center justify-between">
-              <div className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <div className="text-base sm:text-lg font-bold text-black">
                 {formatPrice(product.price)}
               </div>
               <Link 
                 href={`/products/${product.id}`}
-                className="text-xs sm:text-sm text-gray-500 hover:text-blue-600 transition-all duration-300 font-medium group-hover:translate-x-1"
+                className="text-xs sm:text-sm text-gray-500 hover:text-black transition-all duration-300 font-medium group-hover:translate-x-1"
               >
                 Detail →
               </Link>
