@@ -250,6 +250,73 @@ export async function seedDatabase() {
       console.log('Transactions already exist')
     }
 
+    // Check if notifications exist
+    const notificationsExist = await sql`SELECT COUNT(*) as count FROM notifications`
+    
+    if (parseInt(notificationsExist.rows[0].count) === 0) {
+      console.log('Inserting sample notifications...')
+      
+      // Get admin and customer IDs
+      const adminUser = await sql`SELECT id FROM users WHERE role = 'admin' LIMIT 1`
+      const customerUser = await sql`SELECT id FROM users WHERE email = 'customer@test.com' LIMIT 1`
+      
+      if (adminUser.rows.length > 0 && customerUser.rows.length > 0) {
+        const adminId = adminUser.rows[0].id
+        const customerId = customerUser.rows[0].id
+        
+        // Get some products for notification data
+        const products = await sql`SELECT id, name FROM products LIMIT 3`
+        
+        const sampleNotifications = [
+          {
+            user_id: customerId,
+            type: 'transaction_approved',
+            title: 'Pesanan Disetujui!',
+            message: `Pesanan ${products.rows[0].name} telah disetujui. Silakan download file Anda.`,
+            data: JSON.stringify({
+              transactionId: 1,
+              productName: products.rows[0].name
+            }),
+            read: false
+          },
+          {
+            user_id: customerId,
+            type: 'transaction_rejected',
+            title: 'Pesanan Ditolak',
+            message: `Pesanan ${products.rows[1].name} ditolak. Silakan hubungi admin untuk informasi lebih lanjut.`,
+            data: JSON.stringify({
+              transactionId: 2,
+              productName: products.rows[1].name
+            }),
+            read: false
+          },
+          {
+            user_id: adminId,
+            type: 'pending_transaction',
+            title: 'Pesanan Baru Menunggu Persetujuan',
+            message: `Test Customer memesan ${products.rows[2].name}`,
+            data: JSON.stringify({
+              transactionId: 3,
+              productName: products.rows[2].name,
+              customerName: 'Test Customer',
+              amount: 299000
+            }),
+            read: false
+          }
+        ]
+
+        for (const notification of sampleNotifications) {
+          await sql`
+            INSERT INTO notifications (user_id, type, title, message, data, read)
+            VALUES (${notification.user_id}, ${notification.type}, ${notification.title}, ${notification.message}, ${notification.data}, ${notification.read})
+          `
+        }
+        console.log('Sample notifications inserted successfully')
+      }
+    } else {
+      console.log('Notifications already exist')
+    }
+
     console.log('Database seeded successfully')
     return { success: true, message: 'Database seeded successfully' }
   } catch (error) {

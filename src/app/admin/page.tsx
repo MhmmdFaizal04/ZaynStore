@@ -221,16 +221,38 @@ export default function AdminDashboard() {
     })
   }
 
+  const resetProductForm = () => {
+    setProductForm({
+      name: '',
+      description: '',
+      price: '',
+      category: '',
+      file_url: '',
+      image_url: ''
+    })
+    setSelectedProduct(null)
+  }
+
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    console.log('Form data:', productForm)
     
     if (!productForm.name || !productForm.description || !productForm.price || !productForm.category) {
       alert('Nama, deskripsi, harga, dan kategori wajib diisi')
       return
     }
 
+    const price = parseInt(productForm.price)
+    if (isNaN(price) || price <= 0) {
+      alert('Harga harus berupa angka yang valid dan lebih dari 0')
+      return
+    }
+
     try {
       const token = localStorage.getItem('token')
+      console.log('Sending request with token:', token ? 'exists' : 'missing')
+      
       const response = await fetch('/api/products', {
         method: 'POST',
         headers: {
@@ -239,24 +261,22 @@ export default function AdminDashboard() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          ...productForm,
-          price: parseInt(productForm.price)
+          name: productForm.name,
+          description: productForm.description,
+          price: price,
+          category: productForm.category,
+          file_url: productForm.file_url || '',
+          image_url: productForm.image_url || ''
         })
       })
 
       const data = await response.json()
+      console.log('Response:', data)
 
       if (response.ok) {
         alert('Produk berhasil ditambahkan!')
         setIsAddProductModalOpen(false)
-        setProductForm({
-          name: '',
-          description: '',
-          price: '',
-          category: '',
-          file_url: '',
-          image_url: ''
-        })
+        resetProductForm()
         fetchData()
       } else {
         console.error('Add product error:', data)
@@ -281,6 +301,12 @@ export default function AdminDashboard() {
       return
     }
 
+    const price = parseInt(productForm.price)
+    if (isNaN(price) || price <= 0) {
+      alert('Harga harus berupa angka yang valid dan lebih dari 0')
+      return
+    }
+
     try {
       const token = localStorage.getItem('token')
       const response = await fetch(`/api/products/${selectedProduct.id}`, {
@@ -291,8 +317,12 @@ export default function AdminDashboard() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          ...productForm,
-          price: parseInt(productForm.price)
+          name: productForm.name,
+          description: productForm.description,
+          price: price,
+          category: productForm.category,
+          file_url: productForm.file_url || '',
+          image_url: productForm.image_url || ''
         })
       })
 
@@ -301,15 +331,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         alert('Produk berhasil diperbarui!')
         setIsEditProductModalOpen(false)
-        setSelectedProduct(null)
-        setProductForm({
-          name: '',
-          description: '',
-          price: '',
-          category: '',
-          file_url: '',
-          image_url: ''
-        })
+        resetProductForm()
         fetchData()
       } else {
         console.error('Update product error:', data)
@@ -907,7 +929,10 @@ export default function AdminDashboard() {
                     Reset ID Sequence
                   </button>
                   <button
-                    onClick={() => setIsAddProductModalOpen(true)}
+                    onClick={() => {
+                      resetProductForm()
+                      setIsAddProductModalOpen(true)
+                    }}
                     className="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                   >
                     + Tambah Produk
@@ -1197,10 +1222,30 @@ export default function AdminDashboard() {
 
       {/* Add Product Modal */}
       {isAddProductModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh]">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsAddProductModalOpen(false)
+              resetProductForm()
+            }
+          }}
+        >
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h2 className="text-xl font-bold mb-4">Tambah Produk Baru</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Tambah Produk Baru</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddProductModalOpen(false)
+                    resetProductForm()
+                  }}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
               <form onSubmit={handleAddProduct} className="space-y-4">
                 <div>
                   <label className="form-label">Nama Produk</label>
@@ -1211,6 +1256,7 @@ export default function AdminDashboard() {
                     onChange={handleProductFormChange}
                     className="form-input"
                     required
+                    placeholder="Masukkan nama produk"
                   />
                 </div>
                 <div>
@@ -1222,6 +1268,7 @@ export default function AdminDashboard() {
                     className="form-input"
                     rows={3}
                     required
+                    placeholder="Masukkan deskripsi produk"
                   />
                 </div>
                 <div>
@@ -1233,6 +1280,9 @@ export default function AdminDashboard() {
                     onChange={handleProductFormChange}
                     className="form-input"
                     required
+                    min="0"
+                    step="1000"
+                    placeholder="Masukkan harga produk"
                   />
                 </div>
                 <div>
@@ -1272,7 +1322,10 @@ export default function AdminDashboard() {
                 <div className="flex justify-end space-x-4 pt-4">
                   <button
                     type="button"
-                    onClick={() => setIsAddProductModalOpen(false)}
+                    onClick={() => {
+                      setIsAddProductModalOpen(false)
+                      resetProductForm()
+                    }}
                     className="btn-secondary"
                   >
                     Batal
@@ -1292,10 +1345,30 @@ export default function AdminDashboard() {
 
       {/* Edit Product Modal */}
       {isEditProductModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh]">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsEditProductModalOpen(false)
+              resetProductForm()
+            }
+          }}
+        >
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h2 className="text-xl font-bold mb-4">Edit Produk</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Edit Produk</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditProductModalOpen(false)
+                    resetProductForm()
+                  }}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
               <form onSubmit={handleEditProduct} className="space-y-4">
                 <div>
                   <label className="form-label">Nama Produk</label>
@@ -1306,6 +1379,7 @@ export default function AdminDashboard() {
                     onChange={handleProductFormChange}
                     className="form-input"
                     required
+                    placeholder="Masukkan nama produk"
                   />
                 </div>
                 <div>
@@ -1317,6 +1391,7 @@ export default function AdminDashboard() {
                     className="form-input"
                     rows={3}
                     required
+                    placeholder="Masukkan deskripsi produk"
                   />
                 </div>
                 <div>
@@ -1328,6 +1403,9 @@ export default function AdminDashboard() {
                     onChange={handleProductFormChange}
                     className="form-input"
                     required
+                    min="0"
+                    step="1000"
+                    placeholder="Masukkan harga produk"
                   />
                 </div>
                 <div>
@@ -1369,7 +1447,7 @@ export default function AdminDashboard() {
                     type="button"
                     onClick={() => {
                       setIsEditProductModalOpen(false)
-                      setSelectedProduct(null)
+                      resetProductForm()
                     }}
                     className="btn-secondary"
                   >

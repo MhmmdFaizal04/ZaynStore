@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    console.log('Fetching notifications for user:', currentUser.userId)
+
     // Get user notifications
     const notifications = await sql`
       SELECT 
@@ -32,6 +34,8 @@ export async function GET(request: NextRequest) {
       LIMIT 20
     `
 
+    console.log('Found notifications:', notifications.rows.length)
+
     // Format notifications
     const formattedNotifications = notifications.rows.map(notification => ({
       id: notification.id,
@@ -45,6 +49,8 @@ export async function GET(request: NextRequest) {
     }))
 
     const unreadCount = notifications.rows.filter(n => !n.read).length
+
+    console.log('Unread count:', unreadCount)
 
     return NextResponse.json({
       notifications: formattedNotifications,
@@ -81,14 +87,25 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
+    console.log('Marking notification as read:', { notificationId, userId: currentUser.userId })
+
+    // Convert notificationId to integer if it's a string
+    const id = typeof notificationId === 'string' ? parseInt(notificationId) : notificationId
+
     // Update notification as read
-    await sql`
+    const result = await sql`
       UPDATE notifications 
       SET read = TRUE, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${notificationId} AND user_id = ${currentUser.userId}
+      WHERE id = ${id} AND user_id = ${currentUser.userId}
     `
 
-    return NextResponse.json({ success: true })
+    console.log('Update result:', result.rowCount)
+
+    return NextResponse.json({ 
+      success: true, 
+      updated: result.rowCount,
+      notificationId: id 
+    })
 
   } catch (error) {
     console.error('Mark notification as read error:', error)
