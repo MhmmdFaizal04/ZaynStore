@@ -80,8 +80,163 @@ export default function AdminDashboard() {
     confirmPassword: ''
   })
   const [passwordChangeLoading, setPasswordChangeLoading] = useState(false)
+  
+  // Pagination states
+  const [transactionPage, setTransactionPage] = useState(1)
+  const [memberPage, setMemberPage] = useState(1)
+  const itemsPerPage = 10 // Back to 10 items per page
 
   const router = useRouter()
+
+  // Pagination helper functions
+  const getPaginatedData = (data: any[], page: number) => {
+    const startIndex = (page - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return data.slice(startIndex, endIndex)
+  }
+
+  const getTotalPages = (dataLength: number) => {
+    return Math.ceil(dataLength / itemsPerPage)
+  }
+
+  // Pagination component
+  const Pagination = ({ 
+    currentPage, 
+    totalPages, 
+    onPageChange, 
+    dataType 
+  }: { 
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+    dataType: string
+  }) => {
+    const pages = []
+    const maxVisiblePages = 5
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i)
+    }
+
+    return (
+      <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+        <div className="flex justify-between flex-1 sm:hidden">
+          <button
+            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages || totalPages === 0}
+            className="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700">
+              Showing{' '}
+              <span className="font-medium">{Math.max(1, (currentPage - 1) * itemsPerPage + 1)}</span> to{' '}
+              <span className="font-medium">
+                {Math.min(currentPage * itemsPerPage, 
+                  dataType === 'transactions' ? transactions.length : members.length)}
+              </span>{' '}
+              of{' '}
+              <span className="font-medium">
+                {dataType === 'transactions' ? transactions.length : members.length}
+              </span>{' '}
+              {dataType}
+            </p>
+          </div>
+          {totalPages > 1 && (
+            <div>
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                
+                {startPage > 1 && (
+                  <>
+                    <button
+                      onClick={() => onPageChange(1)}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      1
+                    </button>
+                    {startPage > 2 && (
+                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                        ...
+                      </span>
+                    )}
+                  </>
+                )}
+                
+                {pages.map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => onPageChange(page)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      page === currentPage
+                        ? 'z-10 bg-black border-black text-white'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                {endPage < totalPages && (
+                  <>
+                    {endPage < totalPages - 1 && (
+                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                        ...
+                      </span>
+                    )}
+                    <button
+                      onClick={() => onPageChange(totalPages)}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      {totalPages}
+                    </button>
+                  </>
+                )}
+                
+                <button
+                  onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   // Helper function untuk mengkonversi URL gambar ke endpoint yang benar
   const getImageUrl = (paymentProof: string) => {
@@ -130,15 +285,15 @@ export default function AdminDashboard() {
       })
       const productsData = await productsResponse.json()
       
-      // Fetch transactions
-      const transactionsResponse = await fetch('/api/transactions', {
+      // Fetch all transactions (with large limit to get all data)
+      const transactionsResponse = await fetch('/api/transactions?limit=1000', {
         headers,
         credentials: 'include'
       })
       const transactionsData = await transactionsResponse.json()
       
-      // Fetch members
-      const membersResponse = await fetch('/api/members', {
+      // Fetch all members (with large limit to get all data)
+      const membersResponse = await fetch('/api/members?limit=1000', {
         headers,
         credentials: 'include'
       })
@@ -177,6 +332,10 @@ export default function AdminDashboard() {
       if (membersResponse.ok) {
         setMembers(membersData.members || [])
       }
+      
+      // Reset pagination to first page after data refresh
+      setTransactionPage(1)
+      setMemberPage(1)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -1065,7 +1224,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {transactions.map((transaction) => (
+                      {getPaginatedData(transactions, transactionPage).map((transaction) => (
                         <tr key={transaction.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
@@ -1122,6 +1281,64 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+                
+                {transactions.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Belum ada transaksi</p>
+                  </div>
+                )}
+                
+                {/* Transaction Pagination */}
+                {transactions.length > 0 && (
+                  <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                    <div className="flex flex-col sm:flex-row items-center justify-between">
+                      <div className="text-sm text-gray-700 mb-4 sm:mb-0">
+                        Showing{' '}
+                        <span className="font-medium">{Math.max(1, (transactionPage - 1) * itemsPerPage + 1)}</span> to{' '}
+                        <span className="font-medium">
+                          {Math.min(transactionPage * itemsPerPage, transactions.length)}
+                        </span>{' '}
+                        of{' '}
+                        <span className="font-medium">{transactions.length}</span> transactions
+                      </div>
+                      {getTotalPages(transactions.length) > 1 && (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => setTransactionPage(Math.max(1, transactionPage - 1))}
+                            disabled={transactionPage === 1}
+                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Previous
+                          </button>
+                          
+                          <div className="flex space-x-1">
+                            {Array.from({ length: getTotalPages(transactions.length) }, (_, i) => i + 1).map((page) => (
+                              <button
+                                key={page}
+                                onClick={() => setTransactionPage(page)}
+                                className={`px-3 py-2 text-sm border rounded-md ${
+                                  page === transactionPage
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <button
+                            onClick={() => setTransactionPage(Math.min(getTotalPages(transactions.length), transactionPage + 1))}
+                            disabled={transactionPage === getTotalPages(transactions.length)}
+                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1161,7 +1378,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {members.map((member) => (
+                      {getPaginatedData(members, memberPage).map((member) => (
                         <tr key={member.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
@@ -1212,6 +1429,58 @@ export default function AdminDashboard() {
                 {members.length === 0 && (
                   <div className="text-center py-8">
                     <p className="text-gray-500">Belum ada member yang terdaftar</p>
+                  </div>
+                )}
+                
+                {/* Member Pagination */}
+                {members.length > 0 && (
+                  <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                    <div className="flex flex-col sm:flex-row items-center justify-between">
+                      <div className="text-sm text-gray-700 mb-4 sm:mb-0">
+                        Showing{' '}
+                        <span className="font-medium">{Math.max(1, (memberPage - 1) * itemsPerPage + 1)}</span> to{' '}
+                        <span className="font-medium">
+                          {Math.min(memberPage * itemsPerPage, members.length)}
+                        </span>{' '}
+                        of{' '}
+                        <span className="font-medium">{members.length}</span> members
+                      </div>
+                      {getTotalPages(members.length) > 1 && (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => setMemberPage(Math.max(1, memberPage - 1))}
+                            disabled={memberPage === 1}
+                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Previous
+                          </button>
+                          
+                          <div className="flex space-x-1">
+                            {Array.from({ length: getTotalPages(members.length) }, (_, i) => i + 1).map((page) => (
+                              <button
+                                key={page}
+                                onClick={() => setMemberPage(page)}
+                                className={`px-3 py-2 text-sm border rounded-md ${
+                                  page === memberPage
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <button
+                            onClick={() => setMemberPage(Math.min(getTotalPages(members.length), memberPage + 1))}
+                            disabled={memberPage === getTotalPages(members.length)}
+                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
