@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
 interface Notification {
@@ -24,8 +24,15 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [lastMarkAsReadTime, setLastMarkAsReadTime] = useState(0)
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async (force = false) => {
+    // Don't fetch if recently marked as read (within 5 seconds) unless forced
+    if (!force && Date.now() - lastMarkAsReadTime < 5000) {
+      console.log('Skipping fetch - recently marked notification as read')
+      return
+    }
+    
     try {
       setLoading(true)
       const token = localStorage.getItem('token')
@@ -38,6 +45,7 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('Fetched notifications:', data)
         setNotifications(data.notifications || [])
         setUnreadCount(data.unread_count || 0)
       }
@@ -46,10 +54,11 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [lastMarkAsReadTime])
 
   const markAsRead = async (notificationId: string | number) => {
     try {
+      console.log('Marking notification as read:', notificationId)
       const token = localStorage.getItem('token')
       const response = await fetch('/api/notifications', {
         method: 'PATCH',
@@ -61,17 +70,36 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
         body: JSON.stringify({ notificationId }),
       })
 
+      const data = await response.json()
+      console.log('Mark as read response:', data)
+
       if (response.ok) {
+        console.log('Successfully marked as read, updating local state')
+        setLastMarkAsReadTime(Date.now())
+        
         // Update local state
-        setNotifications(prev => 
-          prev.map(notif => 
-            notif.id === notificationId 
+        setNotifications(prev => {
+          const updated = prev.map(notif => {
+            // Convert both IDs to string for comparison to ensure consistency
+            const notifIdStr = String(notif.id)
+            const targetIdStr = String(notificationId)
+            console.log('Comparing IDs:', { notifIdStr, targetIdStr, match: notifIdStr === targetIdStr })
+            
+            return notifIdStr === targetIdStr 
               ? { ...notif, read: true }
               : notif
-          )
-        )
+          })
+          console.log('Updated notifications:', updated)
+          return updated
+        })
         // Update unread count
-        setUnreadCount(prev => Math.max(0, prev - 1))
+        setUnreadCount(prev => {
+          const newCount = Math.max(0, prev - 1)
+          console.log('Updated unread count:', newCount)
+          return newCount
+        })
+      } else {
+        console.error('Failed to mark as read:', data)
       }
     } catch (error) {
       console.error('Error marking notification as read:', error)
@@ -95,13 +123,15 @@ export default function NotificationBell({ userRole }: NotificationBellProps) {
   }
 
   useEffect(() => {
-    fetchNotifications()
+    fetchNotifications(true) // Force initial fetch
     
     // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000)
+    const interval = setInterval(() => {
+      fetchNotifications(false) // Normal polling fetch
+    }, 30000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchNotifications])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)

@@ -141,24 +141,31 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Mobile menu button */}
-          <button 
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 hover:scale-110"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <div className="relative w-6 h-6">
-              <span className={`absolute block w-full h-0.5 bg-gray-700 transform transition-all duration-300 ${
-                isMenuOpen ? 'rotate-45 top-3' : 'top-1'
-              }`}></span>
-              <span className={`absolute block w-full h-0.5 bg-gray-700 transform transition-all duration-300 top-3 ${
-                isMenuOpen ? 'opacity-0' : 'opacity-100'
-              }`}></span>
-              <span className={`absolute block w-full h-0.5 bg-gray-700 transform transition-all duration-300 ${
-                isMenuOpen ? '-rotate-45 top-3' : 'top-5'
-              }`}></span>
-            </div>
-          </button>
+          {/* Mobile menu button and notification */}
+          <div className="lg:hidden flex items-center space-x-3">
+            {/* Mobile Notification Bell for logged-in users */}
+            {user && (
+              <NotificationBell userRole={user.role} />
+            )}
+            
+            <button 
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-300 hover:scale-110"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <div className="relative w-6 h-6">
+                <span className={`absolute block w-full h-0.5 bg-gray-700 transform transition-all duration-300 ${
+                  isMenuOpen ? 'rotate-45 top-3' : 'top-1'
+                }`}></span>
+                <span className={`absolute block w-full h-0.5 bg-gray-700 transform transition-all duration-300 top-3 ${
+                  isMenuOpen ? 'opacity-0' : 'opacity-100'
+                }`}></span>
+                <span className={`absolute block w-full h-0.5 bg-gray-700 transform transition-all duration-300 ${
+                  isMenuOpen ? '-rotate-45 top-3' : 'top-5'
+                }`}></span>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -203,9 +210,13 @@ export default function Header() {
                   )}
                   
                   <div className="pt-3 border-t border-gray-200 space-y-3">
-                    <div className="text-gray-600 text-sm px-4 flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span>Halo, {user.name}</span>
+                    <div className="flex items-center justify-between px-4">
+                      <div className="text-gray-600 text-sm flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span>Halo, {user.name}</span>
+                      </div>
+                      {/* Mobile Notification Bell */}
+                      <NotificationBell userRole={user.role} />
                     </div>
                     <button
                       onClick={() => {

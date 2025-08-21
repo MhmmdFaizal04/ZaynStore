@@ -87,10 +87,17 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    console.log('Marking notification as read:', { notificationId, userId: currentUser.userId })
+    console.log('Marking notification as read:', { notificationId, userId: currentUser.userId, type: typeof notificationId })
 
     // Convert notificationId to integer if it's a string
     const id = typeof notificationId === 'string' ? parseInt(notificationId) : notificationId
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid notification ID' },
+        { status: 400 }
+      )
+    }
 
     // Update notification as read
     const result = await sql`
@@ -99,7 +106,7 @@ export async function PATCH(request: NextRequest) {
       WHERE id = ${id} AND user_id = ${currentUser.userId}
     `
 
-    console.log('Update result:', result.rowCount)
+    console.log('Update result:', { rowCount: result.rowCount, notificationId: id })
 
     return NextResponse.json({ 
       success: true, 
