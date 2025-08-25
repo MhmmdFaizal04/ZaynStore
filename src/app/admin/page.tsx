@@ -120,41 +120,135 @@ export default function AdminDashboard() {
     onPageChange: (page: number) => void
     dataType: string
   }) => {
-    const pages = []
-    const maxVisiblePages = 5
-    
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-    
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    // Generate page numbers for desktop with ellipsis
+    const generateDesktopPages = () => {
+      const pages = []
+      const maxVisiblePages = 5
+      
+      if (totalPages <= maxVisiblePages + 2) {
+        // Show all pages if total is small
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        // Always show first page
+        pages.push(1)
+        
+        let startPage = Math.max(2, currentPage - 1)
+        let endPage = Math.min(totalPages - 1, currentPage + 1)
+        
+        // Adjust range to always show 3 middle pages when possible
+        if (currentPage <= 3) {
+          endPage = Math.min(4, totalPages - 1)
+        } else if (currentPage >= totalPages - 2) {
+          startPage = Math.max(totalPages - 3, 2)
+        }
+        
+        // Add ellipsis before middle pages if needed
+        if (startPage > 2) {
+          pages.push('...')
+        }
+        
+        // Add middle pages
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(i)
+        }
+        
+        // Add ellipsis after middle pages if needed
+        if (endPage < totalPages - 1) {
+          pages.push('...')
+        }
+        
+        // Always show last page
+        if (totalPages > 1) {
+          pages.push(totalPages)
+        }
+      }
+      
+      return pages
     }
 
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i)
+    // Generate page numbers for mobile (simplified)
+    const generateMobilePages = () => {
+      const pages = []
+      const maxMobilePages = 3
+      
+      if (totalPages <= maxMobilePages + 2) {
+        // Show all pages if total is small
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        if (currentPage <= 2) {
+          // Show first few pages
+          pages.push(1, 2, 3, '...', totalPages)
+        } else if (currentPage >= totalPages - 1) {
+          // Show last few pages
+          pages.push(1, '...', totalPages - 2, totalPages - 1, totalPages)
+        } else {
+          // Show current page with context
+          pages.push(1, '...', currentPage, '...', totalPages)
+        }
+      }
+      
+      return pages
     }
+
+    const desktopPages = generateDesktopPages()
+    const mobilePages = generateMobilePages()
+
+    if (totalPages <= 1) return null
 
     return (
       <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
-        <div className="flex justify-between flex-1 sm:hidden">
+        {/* Mobile Pagination */}
+        <div className="flex justify-between items-center w-full sm:hidden">
           <button
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Previous
+            <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            Prev
           </button>
-          <span className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
+          
+          <div className="flex space-x-1">
+            {mobilePages.map((page, index) => (
+              page === '...' ? (
+                <span key={`ellipsis-${index}`} className="px-2 py-1 text-sm text-gray-500">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => onPageChange(page as number)}
+                  className={`px-3 py-1 text-sm font-medium rounded ${
+                    page === currentPage
+                      ? 'bg-black text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            ))}
+          </div>
+          
           <button
             onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages || totalPages === 0}
-            className="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={currentPage === totalPages}
+            className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
+            <svg className="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
           </button>
         </div>
+
+        {/* Desktop Pagination */}
         <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-gray-700">
@@ -171,39 +265,28 @@ export default function AdminDashboard() {
               {dataType}
             </p>
           </div>
-          {totalPages > 1 && (
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <button
-                  onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                
-                {startPage > 1 && (
-                  <>
-                    <button
-                      onClick={() => onPageChange(1)}
-                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      1
-                    </button>
-                    {startPage > 2 && (
-                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                        ...
-                      </span>
-                    )}
-                  </>
-                )}
-                
-                {pages.map((page) => (
+          
+          <div>
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+              
+              {desktopPages.map((page, index) => (
+                page === '...' ? (
+                  <span key={`ellipsis-${index}`} className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    ...
+                  </span>
+                ) : (
                   <button
                     key={page}
-                    onClick={() => onPageChange(page)}
+                    onClick={() => onPageChange(page as number)}
                     className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                       page === currentPage
                         ? 'z-10 bg-black border-black text-white'
@@ -212,36 +295,20 @@ export default function AdminDashboard() {
                   >
                     {page}
                   </button>
-                ))}
-                
-                {endPage < totalPages && (
-                  <>
-                    {endPage < totalPages - 1 && (
-                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                        ...
-                      </span>
-                    )}
-                    <button
-                      onClick={() => onPageChange(totalPages)}
-                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      {totalPages}
-                    </button>
-                  </>
-                )}
-                
-                <button
-                  onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </nav>
-            </div>
-          )}
+                )
+              ))}
+              
+              <button
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
         </div>
       </div>
     )
@@ -262,7 +329,13 @@ export default function AdminDashboard() {
 
   const fetchAnnouncements = useCallback(async () => {
     try {
-      const response = await fetch('/api/announcements')
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/announcements', {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include'
+      })
       const data = await response.json()
       
       if (response.ok) {
@@ -807,9 +880,14 @@ export default function AdminDashboard() {
   const handleAddAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      const token = localStorage.getItem('token')
       const response = await fetch('/api/announcements', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include',
         body: JSON.stringify(announcementForm)
       })
 
@@ -831,8 +909,13 @@ export default function AdminDashboard() {
 
   const handleDeleteAnnouncement = async (announcementId: number) => {
     try {
-      const response = await fetch(`/api/announcements/${announcementId}`, {
-        method: 'DELETE'
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/announcements?id=${announcementId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include'
       })
 
       const data = await response.json()
@@ -1396,56 +1479,12 @@ export default function AdminDashboard() {
                 )}
                 
                 {/* Transaction Pagination */}
-                {transactions.length > 0 && (
-                  <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
-                    <div className="flex flex-col sm:flex-row items-center justify-between">
-                      <div className="text-sm text-gray-700 mb-4 sm:mb-0">
-                        Showing{' '}
-                        <span className="font-medium">{Math.max(1, (transactionPage - 1) * itemsPerPage + 1)}</span> to{' '}
-                        <span className="font-medium">
-                          {Math.min(transactionPage * itemsPerPage, transactions.length)}
-                        </span>{' '}
-                        of{' '}
-                        <span className="font-medium">{transactions.length}</span> transactions
-                      </div>
-                      {getTotalPages(transactions.length) > 1 && (
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => setTransactionPage(Math.max(1, transactionPage - 1))}
-                            disabled={transactionPage === 1}
-                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Previous
-                          </button>
-                          
-                          <div className="flex space-x-1">
-                            {Array.from({ length: getTotalPages(transactions.length) }, (_, i) => i + 1).map((page) => (
-                              <button
-                                key={page}
-                                onClick={() => setTransactionPage(page)}
-                                className={`px-3 py-2 text-sm border rounded-md ${
-                                  page === transactionPage
-                                    ? 'bg-black text-white border-black'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                                }`}
-                              >
-                                {page}
-                              </button>
-                            ))}
-                          </div>
-                          
-                          <button
-                            onClick={() => setTransactionPage(Math.min(getTotalPages(transactions.length), transactionPage + 1))}
-                            disabled={transactionPage === getTotalPages(transactions.length)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Next
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={transactionPage}
+                  totalPages={getTotalPages(transactions.length)}
+                  onPageChange={setTransactionPage}
+                  dataType="transactions"
+                />
               </div>
             </div>
           )}
@@ -1540,56 +1579,12 @@ export default function AdminDashboard() {
                 )}
                 
                 {/* Member Pagination */}
-                {members.length > 0 && (
-                  <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
-                    <div className="flex flex-col sm:flex-row items-center justify-between">
-                      <div className="text-sm text-gray-700 mb-4 sm:mb-0">
-                        Showing{' '}
-                        <span className="font-medium">{Math.max(1, (memberPage - 1) * itemsPerPage + 1)}</span> to{' '}
-                        <span className="font-medium">
-                          {Math.min(memberPage * itemsPerPage, members.length)}
-                        </span>{' '}
-                        of{' '}
-                        <span className="font-medium">{members.length}</span> members
-                      </div>
-                      {getTotalPages(members.length) > 1 && (
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => setMemberPage(Math.max(1, memberPage - 1))}
-                            disabled={memberPage === 1}
-                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Previous
-                          </button>
-                          
-                          <div className="flex space-x-1">
-                            {Array.from({ length: getTotalPages(members.length) }, (_, i) => i + 1).map((page) => (
-                              <button
-                                key={page}
-                                onClick={() => setMemberPage(page)}
-                                className={`px-3 py-2 text-sm border rounded-md ${
-                                  page === memberPage
-                                    ? 'bg-black text-white border-black'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                                }`}
-                              >
-                                {page}
-                              </button>
-                            ))}
-                          </div>
-                          
-                          <button
-                            onClick={() => setMemberPage(Math.min(getTotalPages(members.length), memberPage + 1))}
-                            disabled={memberPage === getTotalPages(members.length)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Next
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={memberPage}
+                  totalPages={getTotalPages(members.length)}
+                  onPageChange={setMemberPage}
+                  dataType="members"
+                />
               </div>
             </div>
           )}

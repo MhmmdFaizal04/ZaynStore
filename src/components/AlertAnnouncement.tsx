@@ -29,17 +29,18 @@ export default function AlertAnnouncement() {
   }, [])
 
   useEffect(() => {
-    if (user) {
+    // Only fetch alerts for logged-in users who are NOT admin
+    if (user && user.role !== 'admin') {
       fetchAlertAnnouncements()
     }
   }, [user])
 
   useEffect(() => {
-    if (alertAnnouncements.length > 0 && !currentAlert && !hasBeenClosed) {
+    if (alertAnnouncements.length > 0 && !currentAlert && !hasBeenClosed && user && user.role !== 'admin') {
       setCurrentAlert(alertAnnouncements[0])
       setShowAlert(true)
     }
-  }, [alertAnnouncements, currentAlert, hasBeenClosed])
+  }, [alertAnnouncements, currentAlert, hasBeenClosed, user])
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -90,7 +91,7 @@ export default function AlertAnnouncement() {
     }
   }
 
-  if (!showAlert || !currentAlert || !user) {
+  if (!showAlert || !currentAlert || !user || user.role === 'admin') {
     return null
   }
 
