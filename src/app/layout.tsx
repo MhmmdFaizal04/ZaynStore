@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
+import AlertAnnouncement from '@/components/AlertAnnouncement'
 
 export const metadata: Metadata = {
   title: 'Digital Store - Toko File Digital',
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <AuthProvider>
           {children}
+          <AlertAnnouncement />
         </AuthProvider>
       </body>
     </html>

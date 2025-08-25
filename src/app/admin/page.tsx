@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -80,6 +80,15 @@ export default function AdminDashboard() {
     confirmPassword: ''
   })
   const [passwordChangeLoading, setPasswordChangeLoading] = useState(false)
+  
+  // Announcement states
+  const [isAddAnnouncementModalOpen, setIsAddAnnouncementModalOpen] = useState(false)
+  const [announcements, setAnnouncements] = useState<any[]>([])
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: '',
+    content: '',
+    type: 'board' as 'board' | 'alert'
+  })
   
   // Pagination states
   const [transactionPage, setTransactionPage] = useState(1)
@@ -251,25 +260,20 @@ export default function AdminDashboard() {
     return `/api/payment-proof/${encodeURIComponent(paymentProof)}`
   }
 
-  useEffect(() => {
-    // Check if user is logged in and is admin
-    const userData = localStorage.getItem('user')
-    if (!userData) {
-      router.push('/login')
-      return
+  const fetchAnnouncements = useCallback(async () => {
+    try {
+      const response = await fetch('/api/announcements')
+      const data = await response.json()
+      
+      if (response.ok) {
+        setAnnouncements(data.announcements || [])
+      }
+    } catch (error) {
+      console.error('Error fetching announcements:', error)
     }
+  }, [])
 
-    const parsedUser = JSON.parse(userData)
-    if (parsedUser.role !== 'admin') {
-      router.push('/')
-      return
-    }
-
-    setUser(parsedUser)
-    fetchData()
-  }, [router])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -333,6 +337,9 @@ export default function AdminDashboard() {
         setMembers(membersData.members || [])
       }
       
+      // Fetch announcements
+      await fetchAnnouncements()
+      
       // Reset pagination to first page after data refresh
       setTransactionPage(1)
       setMemberPage(1)
@@ -341,7 +348,25 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [fetchAnnouncements])
+
+  useEffect(() => {
+    // Check if user is logged in and is admin
+    const userData = localStorage.getItem('user')
+    if (!userData) {
+      router.push('/login')
+      return
+    }
+
+    const parsedUser = JSON.parse(userData)
+    if (parsedUser.role !== 'admin') {
+      router.push('/')
+      return
+    }
+
+    setUser(parsedUser)
+    fetchData()
+  }, [router, fetchData])
 
   const handleLogout = () => {
     localStorage.removeItem('user')
@@ -762,6 +787,68 @@ export default function AdminDashboard() {
     }
   }
 
+  // Announcement functions
+  const handleAnnouncementFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setAnnouncementForm(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const resetAnnouncementForm = () => {
+    setAnnouncementForm({
+      title: '',
+      content: '',
+      type: 'board'
+    })
+  }
+
+  const handleAddAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(announcementForm)
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        alert('Pengumuman berhasil ditambahkan!')
+        setIsAddAnnouncementModalOpen(false)
+        resetAnnouncementForm()
+        fetchAnnouncements() // Refresh announcements list
+      } else {
+        alert(data.error || 'Gagal menambahkan pengumuman')
+      }
+    } catch (error) {
+      console.error('Error adding announcement:', error)
+      alert('Terjadi kesalahan saat menambahkan pengumuman')
+    }
+  }
+
+  const handleDeleteAnnouncement = async (announcementId: number) => {
+    try {
+      const response = await fetch(`/api/announcements/${announcementId}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        alert('Pengumuman berhasil dihapus!')
+        fetchAnnouncements() // Refresh announcements list
+      } else {
+        alert(data.error || 'Gagal menghapus pengumuman')
+      }
+    } catch (error) {
+      console.error('Error deleting announcement:', error)
+      alert('Terjadi kesalahan saat menghapus pengumuman')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 flex items-center justify-center">
@@ -845,6 +932,7 @@ export default function AdminDashboard() {
               <option value="products">Kelola Produk</option>
               <option value="transactions">Transaksi</option>
               <option value="members">Member</option>
+              <option value="announcements">Pengumuman</option>
             </select>
           </div>
         </div>
@@ -938,6 +1026,25 @@ export default function AdminDashboard() {
                     </svg>
                   </div>
                   <span>Member</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => setActiveTab('announcements')}
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium ${
+                    activeTab === 'announcements'
+                      ? 'bg-black text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-black'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg ${
+                    activeTab === 'announcements' ? 'bg-white/20' : 'bg-gray-100'
+                  }`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 717 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                    </svg>
+                  </div>
+                  <span>Pengumuman</span>
                 </button>
               </li>
             </ul>
@@ -1486,6 +1593,129 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {/* Announcements Tab */}
+          {activeTab === 'announcements' && (
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Kelola Pengumuman</h2>
+                  <p className="text-gray-600 mt-1">Buat dan kelola pengumuman untuk member</p>
+                </div>
+                <button 
+                  onClick={() => setIsAddAnnouncementModalOpen(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 w-fit"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Tambah Pengumuman
+                </button>
+              </div>
+
+              {/* Announcements Table */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                  <h3 className="text-lg font-medium text-gray-900">Daftar Pengumuman</h3>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Judul
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Isi Pengumuman
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Tipe
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Dibuat Oleh
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Tanggal
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {announcements.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                            <div className="flex flex-col items-center">
+                              <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 717 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                              </svg>
+                              <span className="text-lg font-medium">Belum ada pengumuman</span>
+                              <span className="text-sm mt-1">Klik tombol &quot;Tambah Pengumuman&quot; untuk membuat pengumuman baru</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        announcements.map((announcement) => (
+                          <tr key={announcement.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
+                                {announcement.title}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900 max-w-xs truncate">
+                                {announcement.content}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                                announcement.type === 'alert' 
+                                  ? 'bg-orange-100 text-orange-800' 
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {announcement.type === 'alert' ? '🔔 Alert' : '📋 Board'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {announcement.created_by_name || 'Admin'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {new Date(announcement.created_at).toLocaleDateString('id-ID', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => {
+                                  if (window.confirm('Yakin ingin menghapus pengumuman ini?')) {
+                                    handleDeleteAnnouncement(announcement.id)
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded transition-colors"
+                              >
+                                Hapus
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1788,6 +2018,127 @@ export default function AdminDashboard() {
                 <p className="text-gray-600 mb-4">Gagal memuat gambar</p>
                 <p className="text-sm text-gray-500">File: {viewingImage}</p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Announcement Modal */}
+      {isAddAnnouncementModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
+              <div className="flex items-center">
+                <div className="bg-blue-600 p-2 rounded-lg mr-3">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 717 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Tambah Pengumuman Baru</h2>
+              </div>
+              <button
+                onClick={() => {
+                  setIsAddAnnouncementModalOpen(false)
+                  resetAnnouncementForm()
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+              <form onSubmit={handleAddAnnouncement} className="space-y-6">
+                <div>
+                  <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Judul Pengumuman <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={announcementForm.title}
+                    onChange={handleAnnouncementFormChange}
+                    placeholder="Masukkan judul pengumuman yang menarik..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="content" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Isi Pengumuman <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="content"
+                    name="content"
+                    rows={6}
+                    value={announcementForm.content}
+                    onChange={handleAnnouncementFormChange}
+                    placeholder="Tulis detail pengumuman di sini..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Pastikan pengumuman jelas dan mudah dipahami oleh semua pengguna.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="type" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Tipe Pengumuman
+                  </label>
+                  <select
+                    id="type"
+                    name="type"
+                    value={announcementForm.type}
+                    onChange={handleAnnouncementFormChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="board">📋 Papan Informasi</option>
+                    <option value="alert">🔔 Alert Pop-up</option>
+                  </select>
+                  <div className="mt-3 p-4 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-600 space-y-2">
+                      <div className="flex items-start">
+                        <span className="text-blue-600 font-medium w-20">Board:</span>
+                        <span>Ditampilkan di halaman utama untuk semua pengunjung yang login</span>
+                      </div>
+                      <div className="flex items-start">
+                        <span className="text-orange-600 font-medium w-20">Alert:</span>
+                        <span>Muncul sebagai notifikasi pop-up saat member login atau mengunjungi situs</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddAnnouncementModalOpen(false)
+                      resetAnnouncementForm()
+                    }}
+                    className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Publikasikan
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

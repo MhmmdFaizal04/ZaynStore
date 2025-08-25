@@ -66,6 +66,37 @@ export async function initDatabase() {
     `
     console.log('Notifications table created successfully')
 
+    // Create announcements table
+    await sql`
+      CREATE TABLE IF NOT EXISTS announcements (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        type VARCHAR(20) DEFAULT 'board' CHECK (type IN ('board', 'alert')),
+        created_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `
+
+    // Add type column to existing announcements table if it doesn't exist
+    try {
+      await sql`
+        ALTER TABLE announcements 
+        ADD COLUMN IF NOT EXISTS type VARCHAR(20) DEFAULT 'board'
+      `
+      await sql`
+        ALTER TABLE announcements 
+        ADD CONSTRAINT announcements_type_check 
+        CHECK (type IN ('board', 'alert'))
+      `
+    } catch (error) {
+      // Column might already exist, ignore the error
+      console.log('Type column might already exist:', error)
+    }
+    
+    console.log('Announcements table created successfully')
+
     console.log('Database tables created successfully')
     return { success: true, message: 'Database initialized successfully' }
   } catch (error) {
@@ -315,6 +346,51 @@ export async function seedDatabase() {
       }
     } else {
       console.log('Notifications already exist')
+    }
+
+    // Check if announcements exist
+    const announcementsExist = await sql`SELECT COUNT(*) as count FROM announcements`
+    
+    if (parseInt(announcementsExist.rows[0].count) === 0) {
+      console.log('Inserting sample announcements...')
+      
+      // Get admin ID
+      const adminUser = await sql`SELECT id FROM users WHERE role = 'admin' LIMIT 1`
+      
+      if (adminUser.rows.length > 0) {
+        const adminId = adminUser.rows[0].id
+        
+        const sampleAnnouncements = [
+          {
+            title: 'Selamat Datang di Zayn Store!',
+            content: 'Terima kasih telah bergabung dengan Zayn Store. Nikmati koleksi produk digital premium kami dengan kualitas terbaik dan harga terjangkau.',
+            type: 'alert',
+            created_by: adminId
+          },
+          {
+            title: 'Update Sistem Pembayaran',
+            content: 'Kami telah mengupdate sistem pembayaran untuk memberikan pengalaman yang lebih baik. Semua transaksi sekarang diproses lebih cepat dan aman.',
+            type: 'board',
+            created_by: adminId
+          },
+          {
+            title: 'Promo Spesial Bulan Ini',
+            content: 'Dapatkan diskon 20% untuk semua template website! Promo berlaku hingga akhir bulan. Jangan lewatkan kesempatan emas ini!',
+            type: 'board',
+            created_by: adminId
+          }
+        ]
+
+        for (const announcement of sampleAnnouncements) {
+          await sql`
+            INSERT INTO announcements (title, content, type, created_by)
+            VALUES (${announcement.title}, ${announcement.content}, ${announcement.type}, ${announcement.created_by})
+          `
+        }
+        console.log('Sample announcements inserted successfully')
+      }
+    } else {
+      console.log('Announcements already exist')
     }
 
     console.log('Database seeded successfully')
