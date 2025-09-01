@@ -371,9 +371,10 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                   <ol className="text-sm text-gray-800 space-y-1">
                     <li>1. Scan QRIS code di atas menggunakan aplikasi mobile banking</li>
                     <li>2. Pastikan nominal pembayaran sesuai dengan total pesanan</li>
-                    <li>3. Lakukan pembayaran dan simpan bukti transaksi</li>
-                    <li>4. Upload screenshot bukti pembayaran di form ini</li>
-                    <li>5. Kami akan memverifikasi dalam 1x24 jam</li>
+                    <li>3. Jika Nominal Pembayaran Lebih Atau Kurang Maka Di Anggap Hangus, SNK Berlaku</li>
+                    <li>4. Lakukan pembayaran dan simpan bukti transaksi</li>
+                    <li>5. Upload screenshot bukti pembayaran di form ini</li>
+                    <li>6. Kami akan memverifikasi dalam 1x24 jam</li>
                   </ol>
                 </div>
 
